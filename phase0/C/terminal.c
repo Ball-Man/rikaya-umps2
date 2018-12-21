@@ -35,7 +35,7 @@ extern bool term_putchar_sel(termreg_t *term, char c) {
 
   if (stat == TERM_ST_TRANSMITTED)
     return true;
-  return true;
+  return false;
 }
 
 /* Print char on standard output */
