@@ -1,3 +1,4 @@
+/* This header defines some 'basic enchancement' for the code syntax and should be included almost everywere */
 #ifndef FASE0_LANG_H_
 #define FASE0_LANG_H_
 
