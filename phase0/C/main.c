@@ -6,7 +6,7 @@
 void main(void)
 {
   term_sel(0);
-  term_printstr("Cristian e' un cattivo ragazzo. Alessandro anche peggio\n");    
+  term_printf("This is a printf test. I'm gonna print:\nOne: %d,\nTen: %d,\nFourtytwo: %d,\nA string: %s\n", 1, 10, 42, "ligma");
 
   WAIT();
   *((uint32_t *) MCTL_POWER) = 0x0FF;
