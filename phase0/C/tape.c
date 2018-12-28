@@ -73,6 +73,11 @@ extern uint32_t tape_backblock(tapereg_t *tape) {
   return tape_command(tape, TAPE_CMD_BACKBLK);
 }
 
+/* Returns a non-zero value if the tape is at its start(marker Tape Start) */
+extern bool tape_ts(tapereg_t *tape) {
+  return tape->data1 == TAPE_MARKER_TS;
+}
+
 /* Returns a non-zero value if the tape is at its end(marker End Of Tape) */
 extern bool tape_eot(tapereg_t *tape) {
   return tape->data1 == TAPE_MARKER_EOT;

@@ -29,6 +29,9 @@ extern uint32_t tape_skipblock(tapereg_t *tape);
  */
 extern uint32_t tape_backblock(tapereg_t *tape);
 
+/* Returns a non-zero value if the tape is at its start(marker Tape Start) */
+extern bool tape_ts(tapereg_t *tape);
+
 /* Returns a non-zero value if the tape is at its end(marker End Of Tape) */
 extern bool tape_eot(tapereg_t *tape);
 
