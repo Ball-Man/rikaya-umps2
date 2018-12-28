@@ -4,7 +4,7 @@
 #include <tape.h>
 #include <lang.h>
 
-/* Function used to get a tape's structure, indexes goes from 0 to 8
+/* Function used to get a tape's structure, indexes goes from 0 to 7
  * Note that this is slightly less efficient that using the right macro
  * to get the register. I'm sacrificing efficiency for this time since
  * I prefer giving the user a function to use instead of a macro.
