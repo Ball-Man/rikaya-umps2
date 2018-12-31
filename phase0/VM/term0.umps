@@ -1,5 +1,6 @@
 This program will execute a buch of reading examples from the tape device.
 
+*** First test:
 ---- tape start ----
 "I love deadlines. I love the whooshing noise they make as they go by."
 - Douglas Adams, The Salmon of Doubt 
@@ -23,3 +24,16 @@ There is another theory which states that this has already happened."
 
 ---- end of tape ----
 
+*** Second test:
+I am the first block. I hate you.
+
+I am the first block. I hate you.
+
+I'm the fourth block. Donate to the author of this project.
+
+I am the third block. This place stinks.
+
+I am the second block. Subscribe to Pewdiepie.
+
+
+For additional info on what these tests are actually doing, read the docs.

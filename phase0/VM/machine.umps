@@ -10,6 +10,14 @@
             "enabled": true,
             "file": "cartridge1.umps"
         },
+        "tape1": {
+            "enabled": true,
+            "file": "cartridge2.umps"
+        },
+        "tape2": {
+            "enabled": true,
+            "file": "cartridge3.umps"
+        },
         "terminal0": {
             "enabled": true,
             "file": "term0.umps"

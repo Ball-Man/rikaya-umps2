@@ -10,4 +10,12 @@
  */
 extern void test_read();
 
+/* This test will use two tapes at the same time(the second and the third tape).
+ * The first of the two being a 'dictionary' containing a couple of text
+ * on each block. The second one being an indexer: every non-zero byte found
+ * will be used to index the first tape, printing on standard output the text
+ * contained on the indexed block(EOFs are considered as EOBs here)
+ */
+extern void test_index();
+
 #endif
