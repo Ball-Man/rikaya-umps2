@@ -1,5 +1,5 @@
-#ifndef FASE1_SEMD_H_
-#define FASE1_SEMD_H_
+#ifndef PHASE1_SEMD_H_
+#define PHASE1_SEMD_H_
 
 #include <list.h>
 

@@ -1,5 +1,5 @@
-#ifndef FASE1_PCB_H_
-#define FASE1_PCB_H_
+#ifndef PHASE1_PCB_H_
+#define PHASE1_PCB_H_
 
 #include <list.h>
 #include <lang.h>

@@ -1,5 +1,5 @@
-#ifndef FASE0_TAPE_E_
-#define FASE0_TAPE_E_
+#ifndef PHASE0_TAPE_E_
+#define PHASE0_TAPE_E_
 
 #include <tape.h>
 #include <lang.h>

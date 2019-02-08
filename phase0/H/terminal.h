@@ -1,5 +1,5 @@
-#ifndef FASE0_TERMINAL_H_
-#define FASE0_TERMINAL_H_
+#ifndef PHASE0_TERMINAL_H_
+#define PHASE0_TERMINAL_H_
 
 #define TERM_ST_READY           1
 #define TERM_ST_BUSY            3

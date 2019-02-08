@@ -1,5 +1,5 @@
-#ifndef FASE0_TESTS_E_
-#define FASE0_TESTS_E_
+#ifndef PHASE0_TESTS_E_
+#define PHASE0_TESTS_E_
 
 /* This test will read from the 0th tape and print the content
  * on the standard output;

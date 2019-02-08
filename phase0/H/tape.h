@@ -1,5 +1,5 @@
-#ifndef FASE0_TERMINAL_H_
-#define FASE0_TERMINAL_H_
+#ifndef PHASE0_TERMINAL_H_
+#define PHASE0_TERMINAL_H_
 
 #include <umps/types.h>
 
