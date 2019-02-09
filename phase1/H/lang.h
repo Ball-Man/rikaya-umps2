@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 #define HIDDEN static
+#define NULL 0
 #define true 1
 #define false 0
 typedef uint8_t bool;
