@@ -2,6 +2,7 @@
 
 #include <list.h>
 #include <const.h>
+#include <pcb.e>
 
 /* Sentinel for the list of free semds */
 HIDDEN struct list_head semdfree_h;

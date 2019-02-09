@@ -21,7 +21,7 @@ extern void initPcbs() {
 
   /* Add all the pcbs to the list */
   for (i = 0; i < MAX_PROC; i++)
-    list_add(&((pcb_table + i)->p_next), &pcbfree_h);
+    freePcb((pcb_table + i));
 }
 
 /* Put p in the list of free pcbs */
@@ -57,50 +57,55 @@ extern pcb_t *allocPcb() {
   return alloc;
 }
 
+/* Initialize the list of pcbs, initializing the list dummy */
 extern void mkEmptyProcQ(struct list_head *list_head) {
   INIT_LIST_HEAD(list_head);
 }
 
+/* Returns true if the list is empty, false otherwise */
 extern int emptyProcQ(struct list_head *list_head) {
   return list_empty(list_head);
 }
 
+/* Insert the element in the queue */
 extern void insertProcQ(struct list_head *list_head, pcb_t *p) {
   struct list_head *pos;
   list_for_each(pos, list_head) {
-    if (list_entry(pos, pcb_t, p_next)->priority < p->priority){
-        list_add_tail(&p->p_next, pos);
-	return;
+    if (list_entry(pos, pcb_t, p_next)->priority < p->priority) {
+      list_add_tail(&p->p_next, pos);
+      return;
     }
   }
   /* Priority less than every other: the if is never triggered; add at the end */
   list_add_tail(&p->p_next, pos);
 }
 
+/* Returns the first element without removing it. Null if list is empty */
 extern pcb_t *headProcQ(struct list_head *list_head) {
-  if(list_empty(list_head))
+  if (emptyProcQ(list_head))
     return NULL;
 
   pcb_t *p = list_entry(list_head->next, pcb_t, p_next);
   return p;
 }
 
+/* Returns the first element removing it. Null if list is empty */
 extern pcb_t *removeProcQ(struct list_head *list_head) {
-  if(list_empty(list_head))
-    return NULL;
+  pcb_t *p = headProcQ(list_head);
 
-  pcb_t *p = list_entry(list_head->next, pcb_t, p_next);
-  list_del(&(p->p_next));
+  if (p)
+    list_del(&(p->p_next));
   return p;
 }
 
+/* Removes the pcb from the queue, Null if absent */
 extern pcb_t *outProcQ(struct list_head *list_head, pcb_t *p) {
   struct list_head *pos;
 
   list_for_each(pos, list_head) {
-    if (list_entry(pos, pcb_t, p_next) == p){
-         list_del(pos);
-	 return list_entry(pos, pcb_t, p_next);
+    if (list_entry(pos, pcb_t, p_next) == p) {
+      list_del(pos);
+      return list_entry(pos, pcb_t, p_next);
     }
   }
 
