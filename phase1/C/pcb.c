@@ -11,7 +11,7 @@ HIDDEN struct list_head pcbfree_h;
  * working with extra low level stuff, so we
  * need to allocate all the pcbs statically 
  */
-HIDDEN pcb_t pcbFree_table[MAX_PROC];
+HIDDEN pcb_t pcb_table[MAX_PROC];
 
 /* Initialize list of free pcbs allocating MAX_PROC of them */
 void initPcbs() {
@@ -21,7 +21,7 @@ void initPcbs() {
 
   /* Add all the pcbs to the list */
   for (i = 0; i < MAX_PROC; i++)
-    list_add(&((pcbFree_table + i)->p_next), &pcbfree_h);
+    list_add(&((pcb_table + i)->p_next), &pcbfree_h);
 }
 
 /* Put p in the list of free pcbs */
