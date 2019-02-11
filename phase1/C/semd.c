@@ -98,3 +98,43 @@ extern bool insertBlocked(int *key, pcb_t *p) {
   insertProcQ(&sem->s_procQ, p);
   return false;
 }
+
+/* Remove and return the first element in the queue of semd corresponding to key */
+extern pcb_t *removeBlocked(int *key) {
+  semd_t *sem = getSemd(key);
+  pcb_t *p;
+
+  if (!sem)       /* If key isn't found */
+    return NULL;
+
+  p = removeProcQ(&sem->s_procQ);
+  if (emptyProcQ(&sem->s_procQ))  /* Free semd if no pcb is enqueued */
+    _freeSemdKey(key);
+
+  return p;
+}
+
+/* Remove p from the semd queue its blocked on */
+extern pcb_t *outBlocked(pcb_t *p) {
+  semd_t *sem = getSemd(p->p_semKey);
+  struct list_head *pos;
+
+  if (!sem)
+    return NULL;
+
+  /* Check if p is found in the given queue */
+  list_for_each(pos, &semd_h)
+    if (p == list_entry(pos, pcb_t, p_next))
+      return p;
+  return NULL;
+}
+
+/* Return (without removing) the first pcb blocked in */
+extern pcb_t *headBlocked(int *key) {
+  semd_t *sem = getSemd(key);
+
+  if (!sem)       /* If key isn't found */
+    return NULL;
+
+  return headProcQ(&sem->s_procQ);
+}

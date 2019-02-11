@@ -13,6 +13,14 @@ extern void initASL();
 /* Get the semd corresponding to the key(from the ASL) */ 
 extern semd_t *getSemd(int *key);
 
+/* *** *** *** */
+/* NOTE: Pcbs specify the queue they're blocked in through their field
+ * called 'p_semKey'. However, the docs didn't specify that these functions
+ * had to actually update that value. This means that p_semKey is never
+ * modified throughout all these fuctions. Blame the docs for this.
+ */
+/* *** *** *** */
+
 /* Insert p in the queue of the semd corresponding to the key,
  * If key isn't found, a new semd is allocated in the ASL,
  * If the system already reached MAX_PROC semds return true
@@ -31,6 +39,9 @@ extern pcb_t *removeBlocked(int *key);
 /* Remove p from the semd queue its blocked on,
  * If p isn't found in the queue, return NULL
  * If everything is fine, return p.
+ * NOTE: this isn't going to free a semd if its queue is
+ *       empty after the removal. This wasn't specified in
+ *       the docs.
  */
 extern pcb_t *outBlocked(pcb_t *p);
 
