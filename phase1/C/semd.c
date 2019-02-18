@@ -123,9 +123,11 @@ extern pcb_t *outBlocked(pcb_t *p) {
     return NULL;
 
   /* Check if p is found in the given queue */
-  list_for_each(pos, &semd_h)
-    if (p == list_entry(pos, pcb_t, p_next))
+  list_for_each(pos, &sem->s_procQ)
+    if (p == list_entry(pos, pcb_t, p_next)) {
+      list_del(&p->p_next);
       return p;
+    }
   return NULL;
 }
 
