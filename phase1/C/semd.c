@@ -117,18 +117,12 @@ extern pcb_t *removeBlocked(int *key) {
 /* Remove p from the semd queue its blocked on */
 extern pcb_t *outBlocked(pcb_t *p) {
   semd_t *sem = getSemd(p->p_semKey);
-  struct list_head *pos;
 
   if (!sem)
     return NULL;
 
   /* Check if p is found in the given queue */
-  list_for_each(pos, &sem->s_procQ)
-    if (p == list_entry(pos, pcb_t, p_next)) {
-      list_del(&p->p_next);
-      return p;
-    }
-  return NULL;
+  return outProcQ(&sem->s_procQ, p);
 }
 
 /* Return (without removing) the first pcb blocked in */
@@ -139,4 +133,35 @@ extern pcb_t *headBlocked(int *key) {
     return NULL;
 
   return headProcQ(&sem->s_procQ);
+}
+
+/* Remove p and the hole tree radicated in p from queues;
+ * I'm using the ProcQ functions where possible, but sometimes
+ * they're just not right for this work.
+ */
+extern void outChildBlocked(pcb_t *p) {
+  struct list_head q;   /* Scan tree using a queue (BFS)*/
+  struct list_head *pos;
+  pcb_t *parent;
+
+  mkEmptyProcQ(&q); /* Create queue */
+
+  /* First elements (root) */
+  outBlocked(p);
+  list_add_tail(&p->p_next, &q);
+
+  /* Scan */
+  while (!emptyProcQ(&q)) {
+    parent = removeProcQ(&q);
+
+    /* Add children to queue;
+     * IMPORTANT: we need to remove the pcb from the semd's queue before
+     * adding it to the BFS queue since we're using the same struct member
+     * to do it.
+     */
+    list_for_each(pos, &parent->p_child) {
+      outBlocked(list_entry(pos, pcb_t, p_sib));
+      list_add_tail(pos, &q);
+    }
+  }
 }

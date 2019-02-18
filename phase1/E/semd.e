@@ -53,6 +53,10 @@ extern pcb_t *headBlocked(int *key);
 
 /* Remove p and the hole tree radicated in p
  * from the semd queues they are (eventually) blocked on. 
+ * NOTE: this isn't going to 'destroy' the tree itself.
+         The pcbs' tree will remain the same; the function
+         will just remove all the tree members from the
+         processes' queues.
  */
 extern void outChildBlocked(pcb_t *p);
 
