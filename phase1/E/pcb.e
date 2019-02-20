@@ -18,7 +18,7 @@ extern pcb_t *allocPcb();
 extern void mkEmptyProcQ(struct list_head *list_head);
 
 /* Returns true if the list is empty, false otherwise */
-extern int emptyProcQ(struct list_head *list_head);
+extern bool emptyProcQ(struct list_head *list_head);
 
 /* Insert the element in the queue, sorting in descending order
  * of the priority of the pcbs

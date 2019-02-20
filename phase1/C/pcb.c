@@ -63,7 +63,7 @@ extern void mkEmptyProcQ(struct list_head *list_head) {
 }
 
 /* Returns true if the list is empty, false otherwise */
-extern int emptyProcQ(struct list_head *list_head) {
+extern bool emptyProcQ(struct list_head *list_head) {
   return list_empty(list_head);
 }
 
