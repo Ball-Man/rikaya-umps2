@@ -111,3 +111,13 @@ extern pcb_t *outProcQ(struct list_head *list_head, pcb_t *p) {
 
   return NULL;
 }
+
+/* Returns true if p has no child */
+extern bool emptyChild(pcb_t * p) {
+  return list_empty(&p->p_child);
+}
+
+/* Inserts p as child of prnt */
+extern void insertChild(pcb_t *prnt, pcb_t *p) {
+  list_add(&p->p_sib, &prnt->p_child);  /* Adds as first child */
+}

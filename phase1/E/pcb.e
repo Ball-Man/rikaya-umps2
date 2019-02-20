@@ -34,4 +34,19 @@ extern pcb_t *removeProcQ(struct list_head *list_head);
 /* Removes the pcb from the queue, Null if absent */
 extern pcb_t *outProcQ(struct list_head *list_head, pcb_t *p);
 
+/* Returns true if p has no child */
+extern bool emptyChild(pcb_t *p);
+
+/* Inserts p as child of prnt */
+extern void insertChild(pcb_t *prnt, pcb_t *p);
+
+/* Removes and returns the first child of p. Returns NULL if it has no child */
+extern pcb_t *removeChild(pcb_t *p);
+
+/* Removes p from the list of children of its parent,
+ * If p has no parent, returns NULL,
+ * If p has a parent it returns itself.
+ */
+extern pcb_t *outChild(pcb_t *p);
+
 #endif
