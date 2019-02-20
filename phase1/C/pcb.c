@@ -120,4 +120,28 @@ extern bool emptyChild(pcb_t * p) {
 /* Inserts p as child of prnt */
 extern void insertChild(pcb_t *prnt, pcb_t *p) {
   list_add(&p->p_sib, &prnt->p_child);  /* Adds as first child */
+  p->p_parent = prnt;
+}
+
+/* Removes and returns the first child of p. Returns NULL if it has no child */
+extern pcb_t *removeChild(pcb_t *p) {
+  pcb_t *tmp;
+
+  if (emptyChild(p))
+    return NULL;
+
+  tmp = list_entry(p->p_child.next, pcb_t, p_sib);
+  list_del(&tmp->p_sib);  /* Remove from parent */
+  tmp->p_parent = NULL;
+  return tmp;
+}
+
+/* Removes p from the list of children of its parent */
+extern pcb_t *outChild(pcb_t *p) {
+  if (!p->p_parent)
+    return NULL;
+
+  list_del(&p->p_sib);
+  p->p_parent = NULL;
+  return p;
 }
