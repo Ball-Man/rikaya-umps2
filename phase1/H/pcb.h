@@ -1,10 +1,9 @@
 #ifndef PHASE1_PCB_H_
 #define PHASE1_PCB_H_
 
+#include <umps/types.h>
 #include <list.h>
 #include <lang.h>
-
-#define state_t uint32_t
 
 /* Process Control Block */
 typedef struct pcb_t {

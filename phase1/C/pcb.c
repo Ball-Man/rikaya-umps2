@@ -26,13 +26,14 @@ extern void initPcbs() {
 
 /* Put p in the list of free pcbs */
 extern void freePcb(pcb_t *p) {
-  list_add(&(p->p_next), &pcbfree_h);
+  list_add_tail(&(p->p_next), &pcbfree_h);
 }
 
 /* Remove and return one pcb from the free list */
 extern pcb_t *allocPcb() {
   struct list_head *alloc_head;
   pcb_t *alloc;
+  uint8_t i;
 
   if (list_empty(&pcbfree_h))
     return NULL;
@@ -50,7 +51,16 @@ extern pcb_t *allocPcb() {
   alloc->p_parent = NULL;
   INIT_LIST_HEAD(&alloc->p_child);
   INIT_LIST_HEAD(&alloc->p_sib);
-  alloc->p_s = 0;
+  
+  alloc->p_s.entry_hi = 0;
+  alloc->p_s.cause = 0;
+  alloc->p_s.status = 0;
+  alloc->p_s.pc_epc = 0;
+  for (i = 0; i < STATE_GPR_LEN; i++)
+    alloc->p_s.gpr[i] = 0;
+  alloc->p_s.hi = 0;
+  alloc->p_s.lo = 0;
+
   alloc->priority = 0;
   alloc->p_semKey = NULL;
 
@@ -119,7 +129,7 @@ extern bool emptyChild(pcb_t * p) {
 
 /* Inserts p as child of prnt */
 extern void insertChild(pcb_t *prnt, pcb_t *p) {
-  list_add(&p->p_sib, &prnt->p_child);  /* Adds as first child */
+  list_add_tail(&p->p_sib, &prnt->p_child);  /* Adds as last child */
   p->p_parent = prnt;
 }
 
