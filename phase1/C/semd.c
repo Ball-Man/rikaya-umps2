@@ -96,6 +96,7 @@ extern bool insertBlocked(int *key, pcb_t *p) {
       return true;
 
   insertProcQ(&sem->s_procQ, p);
+  p->p_semKey = key;
   return false;
 }
 
@@ -108,6 +109,9 @@ extern pcb_t *removeBlocked(int *key) {
     return NULL;
 
   p = removeProcQ(&sem->s_procQ);
+  if (p)  /* Update key */
+    p->p_semKey = NULL;
+
   if (emptyProcQ(&sem->s_procQ))  /* Free semd if no pcb is enqueued */
     _freeSemdKey(key);
 
@@ -117,12 +121,20 @@ extern pcb_t *removeBlocked(int *key) {
 /* Remove p from the semd queue its blocked on */
 extern pcb_t *outBlocked(pcb_t *p) {
   semd_t *sem = getSemd(p->p_semKey);
-
+  pcb_t *ret;
   if (!sem)
     return NULL;
 
   /* Check if p is found in the given queue */
-  return outProcQ(&sem->s_procQ, p);
+  ret = outProcQ(&sem->s_procQ, p);
+  
+  if (emptyProcQ(&sem->s_procQ))  /* Free semd if no pcb is enqueued */
+    _freeSemdKey(sem->s_key);
+
+  if (ret)
+    ret->p_semKey = NULL;
+
+  return ret;
 }
 
 /* Return (without removing) the first pcb blocked in */
@@ -143,6 +155,7 @@ extern void outChildBlocked(pcb_t *p) {
   struct list_head q;   /* Scan tree using a queue (BFS)*/
   struct list_head *pos;
   pcb_t *parent;
+  pcb_t *el;
 
   mkEmptyProcQ(&q); /* Create queue */
 
@@ -160,8 +173,9 @@ extern void outChildBlocked(pcb_t *p) {
      * to do it.
      */
     list_for_each(pos, &parent->p_child) {
-      outBlocked(list_entry(pos, pcb_t, p_sib));
-      list_add_tail(pos, &q);
+      el = list_entry(pos, pcb_t, p_sib);
+      outBlocked(el);
+      list_add_tail(&el->p_next, &q); /* Add to BFS queue */
     }
   }
 }
