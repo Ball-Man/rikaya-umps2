@@ -15,6 +15,9 @@ HIDDEN struct list_head semd_h;
  */
 HIDDEN semd_t semd_table[MAX_PROC];
 
+/* Initializes a list element if 
+HIDDEN */
+
 /* Initialize list of free semds allocating MAX_PROC of them */
 extern void initASL() {
   uint8_t i;

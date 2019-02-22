@@ -1,6 +1,6 @@
 #include <pcb.e>
 
-#include <lang.h>
+#include <lang.e>
 #include <const.h>
 
 /* Sentinel for the list of free pcbs */
@@ -33,7 +33,6 @@ extern void freePcb(pcb_t *p) {
 extern pcb_t *allocPcb() {
   struct list_head *alloc_head;
   pcb_t *alloc;
-  uint8_t i;
 
   if (list_empty(&pcbfree_h))
     return NULL;
@@ -42,27 +41,9 @@ extern pcb_t *allocPcb() {
   alloc_head = pcbfree_h.next;
   list_del(alloc_head);
   alloc = list_entry(alloc_head, pcb_t, p_next);
-  
-  /* Initialize pcb */
-  /* List init probably not needed after all but better safe than sorry,
-   * right?
-   */
-  INIT_LIST_HEAD(&alloc->p_next);
-  alloc->p_parent = NULL;
-  INIT_LIST_HEAD(&alloc->p_child);
-  INIT_LIST_HEAD(&alloc->p_sib);
-  
-  alloc->p_s.entry_hi = 0;
-  alloc->p_s.cause = 0;
-  alloc->p_s.status = 0;
-  alloc->p_s.pc_epc = 0;
-  for (i = 0; i < STATE_GPR_LEN; i++)
-    alloc->p_s.gpr[i] = 0;
-  alloc->p_s.hi = 0;
-  alloc->p_s.lo = 0;
 
-  alloc->priority = 0;
-  alloc->p_semKey = NULL;
+  /* Initialize pcb */
+  memset(alloc, 0, sizeof(pcb_t));
 
   return alloc;
 }
@@ -124,11 +105,17 @@ extern pcb_t *outProcQ(struct list_head *list_head, pcb_t *p) {
 
 /* Returns true if p has no child */
 extern bool emptyChild(pcb_t * p) {
-  return list_empty(&p->p_child);
+  return list_empty(&p->p_child) || p->p_child.next == NULL;
 }
 
 /* Inserts p as child of prnt */
 extern void insertChild(pcb_t *prnt, pcb_t *p) {
+  /* Initialize parent's and p's children list if necessary */
+  if (!prnt->p_child.next)
+    INIT_LIST_HEAD(&prnt->p_child);
+  if (!p->p_child.next)
+    INIT_LIST_HEAD(&p->p_child);
+
   list_add_tail(&p->p_sib, &prnt->p_child);  /* Adds as last child */
   p->p_parent = prnt;
 }
