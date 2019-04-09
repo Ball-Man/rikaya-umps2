@@ -13,6 +13,7 @@ typedef struct pcb_t {
   struct list_head p_sib;
   state_t p_s;
   int priority;
+  int original_priority;
   int *p_semKey;
 } pcb_t;
 

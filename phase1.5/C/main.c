@@ -1,9 +1,10 @@
-#include <lang.h>
-#include <list.h>
-#include <umps/libumps.h>
 #include <umps/arch.h>
 #include <umps/types.h>
-#include <pcb.h>
+#include <umps/libumps.h>
+#include <pcb.e>
+#include <log.e>
+#include <lang.h>
+#include <list.h>
 #include <const.h>
 
 #define TRANSMITTED 5
@@ -25,13 +26,10 @@
 
 #define SYS3 3
 #define STEPS 6
-#define GANTT_SIZE 20
 
 int test1_baton[STEPS + 1] = {0};
 int test2_baton[STEPS + 1] = {0};
 int test3_baton[STEPS + 1] = {0};
-
-char gantt_diagram[GANTT_SIZE] = {0};
 
 typedef unsigned int devreg;
 
