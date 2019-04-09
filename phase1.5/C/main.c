@@ -4,6 +4,7 @@
 #include <umps/arch.h>
 #include <umps/types.h>
 #include <pcb.h>
+#include <const.h>
 
 #define TRANSMITTED 5
 #define TRANSTATUS 2
@@ -21,9 +22,6 @@
 
 #define TOD_LO *((unsigned int *)0x1000001C)
 #define TIME_SCALE *((unsigned int *)0x10000024)
-#define RAMBASE *((unsigned int *)0x10000000)
-#define RAMSIZE *((unsigned int *)0x10000004)
-#define RAMTOP (RAMBASE + RAMSIZE)
 
 #define SYS3 3
 #define STEPS 6
