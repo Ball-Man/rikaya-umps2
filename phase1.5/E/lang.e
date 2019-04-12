@@ -8,4 +8,7 @@
  */
 extern void *memset(void *s, int c, size_t n);
 
+/* Copies the specified amount of memory from a source point to a destination point */
+extern void *memcpy(void *s, void *d, size_t n);
+
 #endif

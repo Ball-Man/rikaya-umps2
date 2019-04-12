@@ -1,8 +1,14 @@
 #include <umps/arch.h>
 #include <umps/types.h>
 #include <umps/libumps.h>
-#include <pcb.e>
+#include <terminal.e>
 #include <log.e>
+#include <init.e>
+#include <sysbp.e>
+#include <interrupt.e>
+#include <pcb.e>
+#include <sysbp.h>
+#include <interrupt.h>
 #include <lang.h>
 #include <list.h>
 #include <const.h>
@@ -30,10 +36,6 @@
 int test1_baton[STEPS + 1] = {0};
 int test2_baton[STEPS + 1] = {0};
 int test3_baton[STEPS + 1] = {0};
-
-typedef unsigned int devreg;
-
-typedef unsigned int memaddr;
 
 static unsigned int get_microseconds()
 {
@@ -231,6 +233,20 @@ void test3()
   SYSCALL(SYS3, 0, 0, 0);
 }
 
+/* Entry point */
 void main() {
-  
+  /* Init pcbs */
+  initPcbs();
+
+  /* DEBUG */
+  term_sel(0);
+
+  /* Init New Areas */
+  init_newarea(SYSBP_NAREA, (memaddr)sysbp);
+  init_newarea(INTERRUPT_NAREA, (memaddr)interrupt);
+
+  /* Test syscall */
+  SYSCALL(SYS3, 0, 0, 0);
+
+  while (1);
 }

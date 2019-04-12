@@ -10,4 +10,8 @@
 #define false 0
 typedef uint8_t bool;
 
+typedef unsigned int memaddr;
+
+typedef unsigned int devreg;
+
 #endif
