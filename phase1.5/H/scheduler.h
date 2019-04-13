@@ -1,6 +1,6 @@
 #ifndef PHASE15_SCHEDULER_H_
 #define PHASE15_SCHEDULER_H_
 
-#define TIMESLICE 3
+#define TIMESLICE_MS 3
 
 #endif

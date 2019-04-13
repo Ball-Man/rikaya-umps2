@@ -2,6 +2,7 @@
 #include <umps/types.h>
 #include <umps/libumps.h>
 #include <terminal.e>
+#include <scheduler.e>
 #include <log.e>
 #include <init.e>
 #include <sysbp.e>
@@ -220,9 +221,10 @@ void main() {
   /* Init New Areas */
   init_newarea(SYSBP_NAREA, (memaddr)sysbp);
   init_newarea(INTERRUPT_NAREA, (memaddr)interrupt);
-
-  /* Test syscall */
-  SYSCALL(SYS3, 0, 0, 0);
+  
+  /* Init scheduler */
+  scheduler_init();
+  init_ready((memaddr)test1, (memaddr)test2, (memaddr)test3);
 
   while (1);
 }
