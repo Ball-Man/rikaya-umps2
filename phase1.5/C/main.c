@@ -7,6 +7,7 @@
 #include <sysbp.e>
 #include <interrupt.e>
 #include <pcb.e>
+#include <time.e>
 #include <sysbp.h>
 #include <interrupt.h>
 #include <lang.h>
@@ -27,28 +28,12 @@
 #define BUSY 3
 #define DEV_PER_INT 8 /* Maximum number of devices per interrupt line */
 
-#define TOD_LO *((unsigned int *)0x1000001C)
-#define TIME_SCALE *((unsigned int *)0x10000024)
-
 #define SYS3 3
 #define STEPS 6
 
 int test1_baton[STEPS + 1] = {0};
 int test2_baton[STEPS + 1] = {0};
 int test3_baton[STEPS + 1] = {0};
-
-static unsigned int get_microseconds()
-{
-  return TOD_LO / TIME_SCALE;
-}
-
-static void delay_ms(unsigned int ms)
-{
-  unsigned int start = get_microseconds();
-
-  while (get_microseconds() - start <= ms * 1000)
-    ;
-}
 
 /******************************************************************************
  * I/O Routines to write on a terminal
