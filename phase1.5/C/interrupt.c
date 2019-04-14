@@ -6,6 +6,7 @@
 #include <umps/arch.h>
 #include <lang.h>
 #include <const.h>
+#include <scheduler.e>
 
 /* Internal usage function, returns true(a number != 0) if there's an interrupt
  * pending on the given line.
@@ -18,10 +19,8 @@ HIDDEN bool get_line(uint8_t line) {
 
 /* Main handler for interrupts */
 extern void interrupt() {
-  state_t *old_area = (state_t *)INTERRUPT_OAREA;
+  if (get_line(1)) /* If the local timer interrupt is pending */
+    scheduler();
 
-  term_printf("INTERRUPT\nCause: %d\n", old_area->cause);
-
-  old_area->pc_epc += WORD_SIZE;
-  LDST(old_area);
+  /* Complete interrupt management is coming in the next phase */
 }
