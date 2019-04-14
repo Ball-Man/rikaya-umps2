@@ -3,8 +3,8 @@
 
 #include <lang.h>
 
-/* Internal function used to calculate time */
-HIDDEN unsigned int get_microseconds()
+/* Get number of microseconds passed */
+extern unsigned int get_microseconds()
 {
   return TOD_LO / TIME_SCALE;
 }
