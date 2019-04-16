@@ -3,12 +3,13 @@
 
 #include <lang.h>
 #include <list.h>
+#include <pcb.e>
 
-/* Queue made of maximum 1 element: the pcb of the process currently executing.
- * I'm using a list even if its just one element for a matter of consistency
- * when removing the process tree from the queues. 
- */
-extern struct list_head cur_proc;
+/* This is the process being executed at the moment */
+extern pcb_t *cur_proc;
+
+/* List of ready processes waiting to be executed */
+extern struct list_head ready_queue;
 
 /* Make empty queues for the scheduler */
 extern void scheduler_init();

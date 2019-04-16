@@ -11,37 +11,35 @@
 #include <terminal.e>
 #include <const.h>
 
-/* List of processes waiting. Its currently HIDDEN since in this phase there's no
- * need for it to be extern. Maybe this will change in the next phase
- */
-HIDDEN struct list_head ready_queue;
+/* List of processes waiting to be executed */
+struct list_head ready_queue;
 
 /* Pcb of the process currently in execution */
-struct list_head cur_proc;
+struct pcb_t *cur_proc;
 
 /* Make empty queues for the scheduler */
 extern void scheduler_init() {
   mkEmptyProcQ(&ready_queue);
-  mkEmptyProcQ(&cur_proc);
+  cur_proc = NULL;
 }
 
 /* Called every time a context switch is needed (quantum timeout) */
 extern void scheduler() {
-  pcb_t *current,
-        *next;
+  pcb_t *next,
+        *current;
   struct list_head *pos;
-  if ((current = removeProcQ(&cur_proc))) {  /* If a process was being executed */
-    /* Save state, reset priority and insert in the queue */
+  if ((current = outProcQ(&ready_queue, cur_proc))) {  /* If a process was being executed */
+    /* Save state, reset priority and reinsert in the queue */
     memcpy((state_t *)INTERRUPT_OAREA, &current->p_s, sizeof(state_t));
     current->priority = current->original_priority;
 
     insertProcQ(&ready_queue, current);
   }
 
-  next = removeProcQ(&ready_queue);
+  next = headProcQ(&ready_queue);
 
   /* Age all the other processes */
-  list_for_each(pos, &ready_queue)
+  list_for_each(pos, &next->p_next)
     list_entry(pos, pcb_t, p_next)->priority++;
 
   setTIMER(get_timer_value(TIMESLICE_MS));
@@ -50,7 +48,7 @@ extern void scheduler() {
   log_process_order(next->original_priority);
 
   /* Context switch */
-  insertProcQ(&cur_proc, next);
+  cur_proc = next;
   LDST(&next->p_s);
 }
 
