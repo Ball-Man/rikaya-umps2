@@ -31,7 +31,9 @@ extern void sys3() {
 
   mkEmptyProcQ(&q);
 
+  /* Add the current executing process to the queue, and remove from execution */
   list_add_tail(&outProcQ(&ready_queue, cur_proc)->p_next, &q);
+  cur_proc = NULL;
 
   while ((parent = removeProcQ(&q))) {
     /* Check if the children queue is empty or not defined */
