@@ -14,6 +14,7 @@
 #include <lang.h>
 #include <list.h>
 #include <const.h>
+#include <sysbp.h>
 
 
 /* ****************************************** *
@@ -35,7 +36,6 @@
 #define BUSY 3
 #define DEV_PER_INT 8 /* Maximum number of devices per interrupt line */
 
-#define SYS3 3
 #define STEPS 6
 
 int test1_baton[STEPS + 1] = {0};

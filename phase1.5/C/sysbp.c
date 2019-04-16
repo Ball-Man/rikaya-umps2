@@ -7,11 +7,17 @@
 #include <scheduler.e>
 #include <pcb.e>
 
-/* Main handler for system calls and breakpoints */
+/* Main handler for system calls and breakpoints
+ * NOTE: Breakpoints not handled in this phase
+ */
 extern void sysbp() {
   state_t *old_area = (state_t *)SYSBP_OAREA;
 
-  sys3();
+  switch (old_area->reg_a0) {
+    case SYS3:
+      sys3();
+      break;
+  }
 
   old_area->pc_epc += WORD_SIZE;
   LDST(old_area);
