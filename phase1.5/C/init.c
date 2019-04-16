@@ -3,6 +3,7 @@
 #include <umps/types.h>
 #include <sysbp.h>
 #include <scheduler.e>
+#include <limits.h>
 
 /* Initialize the given New Area with the given handler*/
 extern void init_newarea(memaddr area, memaddr handler) {
@@ -14,10 +15,11 @@ extern void init_newarea(memaddr area, memaddr handler) {
 }
 
 /* Initialize the given ready queue with the given processes */
-void init_ready(memaddr proc1, memaddr proc2, memaddr proc3) {
+void init_ready(memaddr proc1, memaddr proc2, memaddr proc3, memaddr end) {
   scheduler_add(proc1, 1, 1);
   scheduler_add(proc2, 2, 2);
   scheduler_add(proc3, 3, 3);
+  scheduler_add(end, -INT_MAX, 4);
 
   /* Start the scheduler */
   scheduler();

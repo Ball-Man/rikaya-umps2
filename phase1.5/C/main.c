@@ -15,6 +15,12 @@
 #include <list.h>
 #include <const.h>
 
+
+/* ****************************************** *
+ * *                TESTS                   * *
+ * ****************************************** *
+ */
+
 #define TRANSMITTED 5
 #define TRANSTATUS 2
 #define ACK 1
@@ -210,6 +216,15 @@ void test3()
   SYSCALL(SYS3, 0, 0, 0);
 }
 
+/* Entry point for the last process
+ * This process terminates the test, and should have the lowest possible priority.
+ * Basically, it executes when all the other processes are terminated, halting
+ * the system
+ */
+void end() {
+  HALT();
+}
+
 /* Entry point */
 void main() {
   /* Init pcbs */
@@ -224,7 +239,7 @@ void main() {
   
   /* Init scheduler */
   scheduler_init();
-  init_ready((memaddr)test1, (memaddr)test2, (memaddr)test3);
+  init_ready((memaddr)test1, (memaddr)test2, (memaddr)test3, (memaddr)end);
 
   while (1);
 }

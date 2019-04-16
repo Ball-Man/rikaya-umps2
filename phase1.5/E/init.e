@@ -9,6 +9,6 @@
 void init_newarea(memaddr area, memaddr handler);
 
 /* Initialize the given ready queue with the given processes */
-void init_ready(memaddr proc1, memaddr proc2, memaddr proc3);
+void init_ready(memaddr proc1, memaddr proc2, memaddr proc3, memaddr end);
 
 #endif
