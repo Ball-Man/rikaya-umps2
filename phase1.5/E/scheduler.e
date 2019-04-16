@@ -5,7 +5,7 @@
 #include <list.h>
 #include <pcb.e>
 
-/* This is the process being executed at the moment */
+/* The process being executed at the moment */
 extern pcb_t *cur_proc;
 
 /* List of ready processes waiting to be executed */
