@@ -1,5 +1,5 @@
-# umps2-project
-umps2 kernel related project from Unibo
+# Rikaya
+Rikaya is an umps2 kernel project from Unibo.
 
 
 ## Project structure
