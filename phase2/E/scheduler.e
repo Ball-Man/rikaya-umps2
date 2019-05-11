@@ -26,6 +26,6 @@ extern void scheduler_init();
 extern void scheduler();
 
 /* Add a process to the ready queue with the given priority */
-extern bool scheduler_add(memaddr pc, int priority, uint8_t n);
+extern bool scheduler_add(memaddr pc, int priority);
 
 #endif

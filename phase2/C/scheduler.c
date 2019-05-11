@@ -49,7 +49,7 @@ extern void scheduler() {
 }
 
 /* Add a process to the ready queue with the given priority */
-extern bool scheduler_add(memaddr pc, int priority, uint8_t n) {
+extern bool scheduler_add(memaddr pc, int priority) {
   pcb_t *new_proc = allocPcb();
 
   if (!new_proc)  /* If MAXPROC processes are already running */
@@ -60,7 +60,7 @@ extern bool scheduler_add(memaddr pc, int priority, uint8_t n) {
 
   /* Set state */
   new_proc->p_s.pc_epc = pc;
-  new_proc->p_s.reg_sp = RAMTOP - FRAMESIZE * n;
+  new_proc->p_s.reg_sp = RAMTOP - FRAMESIZE * (getPcbOffset(new_proc) + 1);
   new_proc->p_s.status = ST_PREV_INTERRUPTS | ST_LCL_TIMER | (ST_IM_ALL - 0x8000);
   /* 0x8000 is the mask bit for terminal device interrupts. I'm masking it since
    * it's triggered by the terminal operations executed by the test functions.

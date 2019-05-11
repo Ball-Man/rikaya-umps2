@@ -142,3 +142,8 @@ extern pcb_t *outChild(pcb_t *p) {
   p->p_parent = NULL;
   return p;
 }
+
+/* Gets the pcb unitary offset from the internal pcb table(used to calculate stack pointer) */
+extern uint8_t getPcbOffset(pcb_t *p) {
+  return ((memaddr) p - (memaddr) pcb_table) / sizeof(pcb_t);
+}
