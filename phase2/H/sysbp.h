@@ -16,5 +16,6 @@
 #define SYS7 7
 #define SYS8 8
 #define SYS9 9
+#define SYS10 10
 
 #endif

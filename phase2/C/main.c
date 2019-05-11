@@ -1,6 +1,7 @@
 #include <umps/arch.h>
 #include <umps/types.h>
 #include <umps/libumps.h>
+#include <p2test_rikaya_v0.e>
 #include <terminal.e>
 #include <scheduler.e>
 #include <init.e>
@@ -30,7 +31,8 @@ void main() {
   
   /* Init scheduler */
   scheduler_init();
+  scheduler_add((memaddr)test, 1);
+  scheduler();
 
-  term_printf("INIT OK\n");
   while (1);
 }
