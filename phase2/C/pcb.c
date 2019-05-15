@@ -140,6 +140,11 @@ extern pcb_t *outChild(pcb_t *p) {
 
   list_del(&p->p_sib);
   p->p_parent = NULL;
+  
+
+  /* TUTOR */
+  insertChild(cur_tutor, p);
+
   return p;
 }
 

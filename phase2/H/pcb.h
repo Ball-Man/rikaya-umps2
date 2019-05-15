@@ -15,6 +15,8 @@ typedef struct pcb_t {
   int priority;
   int original_priority;
   int *p_semKey;
+  unsigned int p_kernel_time;
+  unsigned int p_user_time;
 } pcb_t;
 
 #endif
