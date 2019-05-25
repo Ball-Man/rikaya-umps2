@@ -29,6 +29,9 @@ void main() {
   init_newarea(SYSBP_NAREA, (memaddr)sysbp);
   init_newarea(INTERRUPT_NAREA, (memaddr)interrupt);
   
+  /* Init interrupt module */
+  interrupt_init();
+
   /* Init scheduler */
   scheduler_init();
   scheduler_add((memaddr)test, 1);
