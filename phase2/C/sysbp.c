@@ -7,6 +7,14 @@
 #include <scheduler.e>
 #include <pcb.e>
 
+/* Wait_Clock semaphore */
+int clock_semaphore;
+
+/* Initialize the sysbp module */
+extern void sysbp_init() {
+  clock_semaphore = 0;
+}
+
 /* Main handler for system calls and breakpoints
  * NOTE: Breakpoints not handled in this phase
  */
