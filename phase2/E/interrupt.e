@@ -5,7 +5,7 @@
 
 /* Array of semaphores for the I/O queues
  * Lines: 3, ..., 6
- * Usage: dev_semaphores[device * (line - 3)] is the semaphore for the given device
+ * Usage: dev_semaphores[device + (line - 3) * N_DEV_PER_IL] is the semaphore for the given device
  * and given line.
  * Note: line 7(terminals) is left behind and will be managed with a proper matrix
  * (since terminals have two internal devices each).

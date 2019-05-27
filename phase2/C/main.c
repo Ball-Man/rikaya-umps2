@@ -29,6 +29,9 @@ void main() {
   init_newarea(SYSBP_NAREA, (memaddr)sysbp);
   init_newarea(INTERRUPT_NAREA, (memaddr)interrupt);
   
+  /* Init sysbp module */
+  sysbp_init();
+
   /* Init interrupt module */
   interrupt_init();
 
