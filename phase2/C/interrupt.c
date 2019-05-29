@@ -1,8 +1,9 @@
 #include <interrupt.e>
 #include <interrupt.h>
 
-#include <terminal.e>
+#include <terminal.h>
 #include <umps/libumps.h>
+#include <umps/arch.h>
 #include <sysbp.e>
 #include <lang.e>
 #include <const.h>
@@ -44,6 +45,9 @@ extern void interrupt_init() {
 extern void interrupt() {
   uint8_t i = 0,
           j = 0;
+  termreg_t *term;
+  uint32_t rc_status,
+           tr_status;
 
   /* Special interrupt lines */
   if (get_line_pending(1)) /* If the local timer interrupt is pending */
@@ -56,10 +60,34 @@ extern void interrupt() {
   /* I/O devices' interrupt lines */
   for (i = 3; i < 7; i++)    /* Skipping line 7 since it has its own special management */
     if (get_line_pending(i)) {
-      for (j = 0; j < 8; i++)
+      for (j = 0; j < 8; j++)
         if (get_device_pending(i, j)) {
           Veroghen(&dev_semaphores[j + (i - 3) * N_DEV_PER_IL]);
           dev_semaphores[j + (i - 3) * N_DEV_PER_IL] = 0;   /* Reset semaphore */
+          ((dtpreg_t *)DEV_REG_ADDR(i, j))->command = DEV_ACK;
         }
     }
+
+  /* Check interrupts for the terminal devices */
+  if (get_line_pending(7))
+    for (i = 0; i < 8; i++)
+      if (get_device_pending(7, i)) {
+        term = (termreg_t *)DEV_REG_ADDR(7, i);
+        tr_status = (term->transm_status) & TERM_STATUS_MASK;
+        rc_status = (term->recv_status) & TERM_STATUS_MASK;
+
+        /* Update receive status */
+        if (rc_status != TERM_ST_BUSY) {
+          Veroghen(&term_semaphores[0][i]);
+          term_semaphores[0][i] = 0;
+          term->recv_command = DEV_ACK;
+        }
+
+        /* Update transmit status */
+        if (tr_status != TERM_ST_BUSY) {
+          Veroghen(&term_semaphores[1][i]);
+          term_semaphores[1][i] = 0;
+          term->transm_command = DEV_ACK;
+        }
+      }
 }

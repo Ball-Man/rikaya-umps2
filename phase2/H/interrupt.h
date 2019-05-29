@@ -8,4 +8,7 @@
 
 #define TERM_LINE DEV_REG_ADDR(IL_TERMINAL, 0) 
 
+/* ACKs are 1 for every device */
+#define DEV_ACK 1
+
 #endif
