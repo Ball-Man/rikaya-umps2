@@ -114,7 +114,7 @@ extern void Verhogen(int *semaddr) {
     process = removeBlocked(semaddr);
     process->priority = process->original_priority;
 		insertProcQ(&ready_queue, process);
-    /* scheduler();     NOTE: we're giving away our quantum */
+    /* scheduler();     NOTE: we're not giving away our quantum */
 	}
 }
 
