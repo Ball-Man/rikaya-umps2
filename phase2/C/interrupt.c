@@ -53,7 +53,7 @@ extern void interrupt() {
   if (get_line_pending(1)) /* If the local timer interrupt is pending */
     scheduler();
   if (get_line_pending(2)) { /* The interval timer interrupt is pending */
-    Veroghen(&clock_semaphore);
+    Verhogen(&clock_semaphore);
     clock_semaphore = 0;  /* Reset semaphore since it's only used for it's queue */
   }
   
@@ -62,7 +62,7 @@ extern void interrupt() {
     if (get_line_pending(i)) {
       for (j = 0; j < 8; j++)
         if (get_device_pending(i, j)) {
-          Veroghen(&dev_semaphores[j + (i - 3) * N_DEV_PER_IL]);
+          Verhogen(&dev_semaphores[j + (i - 3) * N_DEV_PER_IL]);
           dev_semaphores[j + (i - 3) * N_DEV_PER_IL] = 0;   /* Reset semaphore */
           ((dtpreg_t *)DEV_REG_ADDR(i, j))->command = DEV_ACK;
         }
@@ -78,14 +78,14 @@ extern void interrupt() {
 
         /* Update receive status */
         if (rc_status != TERM_ST_BUSY) {
-          Veroghen(&term_semaphores[0][i]);
+          Verhogen(&term_semaphores[0][i]);
           term_semaphores[0][i] = 0;
           term->recv_command = DEV_ACK;
         }
 
         /* Update transmit status */
         if (tr_status != TERM_ST_BUSY) {
-          Veroghen(&term_semaphores[1][i]);
+          Verhogen(&term_semaphores[1][i]);
           term_semaphores[1][i] = 0;
           term->transm_command = DEV_ACK;
         }

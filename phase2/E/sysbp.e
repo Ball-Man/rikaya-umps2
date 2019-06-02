@@ -24,7 +24,7 @@ extern int Create_Process(state_t *statep, int priority, void **cpid);
 extern void Terminate_Process();
 
 /*  */
-extern void Veroghen(int *semaddr);
+extern void Verhogen(int *semaddr);
 
 /*  */
 extern void Passeren(int *semaddr);
