@@ -31,9 +31,12 @@ extern void sysbp() {
    * For a complete list, see sysbp.h
    */
   switch (old_area->reg_a0) {
-    /* case SYS1: ...
-     * case SYS2: ...
-     */
+    case SYS4:
+      Verhogen(old_area->reg_a1);
+      break;
+    case SYS5:
+      Passeren(old_area->reg_a1);
+      break;
   }
 
   old_area->pc_epc += WORD_SIZE;
