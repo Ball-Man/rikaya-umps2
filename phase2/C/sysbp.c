@@ -103,25 +103,36 @@ extern void Terminate_Process() {
   scheduler();	
 }
 
-/*  */
+/* Verhogen: free a semaphore */
 extern void Verhogen(int *semaddr) {
-  semaddr += 1;
-	pcb_t *process = removeBlocked(semaddr);
-	
-	if (process != NULL) {
-		process->p_semKey = NULL;
+	pcb_t *process; 
+
+  *semaddr += 1;
+
+	if (*semaddr <= 0) {
+    /* Wake up one process and reset process priority */
+    process = removeBlocked(semaddr);
+    process->priority = process->original_priority;
 		insertProcQ(&ready_queue, process);
+    /* scheduler();     NOTE: we're giving away our quantum */
 	}
-	scheduler();
 }
 
-/*  */
+/* Passeren: require a semaphore */
 extern void Passeren(int *semaddr) {
-  if (semaddr > 0) {
-    semaddr -= 1;
-    insertBlocked(semaddr, cur_proc);
-    cur_proc->p_semKey = semaddr;
+  state_t *old_area = (state_t *)SYSBP_OAREA;
+
+  *semaddr -= 1;
+
+  if (*semaddr < 0) {
+    /* Save state of cur_proc and push it in the semd queue */
+    /* NOTE: its priority is still aged. The original priority will be set with Verhogen */
+    old_area->pc_epc += WORD_SIZE;
+    memcpy(old_area, &cur_proc->p_s, sizeof(state_t));
+    insertBlocked(semaddr, outProcQ(&ready_queue, cur_proc));
     cur_proc = NULL;
+
+    /* Schedule new process */
     scheduler();
   }
 }
