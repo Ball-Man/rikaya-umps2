@@ -12,6 +12,6 @@
 #define DEV_ACK 1
 
 #define INTER_DEVICES_BASE 0x1000003C
-#define INTER_DEVICES(line) (INTER_DEVICES_BASE + line * WS)
+#define INTER_DEVICES(line) (INTER_DEVICES_BASE + (line - 3) * WS)
 
 #endif
