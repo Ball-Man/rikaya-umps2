@@ -11,4 +11,7 @@
 /* ACKs are 1 for every device */
 #define DEV_ACK 1
 
+#define INTER_DEVICES_BASE 0x1000003C
+#define INTER_DEVICES(line) (INTER_DEVICES_BASE + line * WS)
+
 #endif

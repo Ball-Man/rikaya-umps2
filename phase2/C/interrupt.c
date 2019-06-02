@@ -32,7 +32,7 @@ HIDDEN bool get_line_pending(uint8_t line) {
  * on the given line from a specific device[0, 7]
  */
 HIDDEN bool get_device_pending(uint8_t line, uint8_t device) {
-  /* TODO: see Principles of Operations pdf page 48(book page 36) */
+  return (INTER_DEVICES(line) >> device) % 2; 
 }
 
 /* Inits the module(sempaphores to 0, mainly) */
