@@ -68,8 +68,10 @@ extern void Get_CPU_Time(unsigned int *user, unsigned int *kernel, unsigned int 
  * 0 if successfull, -1 otherwise */
 extern int Create_Process(state_t *statep, int priority, void **cpid) {
 	pcb_t *new_proc = allocPcb();
+
   if (cpid)
     *cpid = new_proc;
+
 	if (!new_proc)
 	  return -1;
 	/* Set priority */
