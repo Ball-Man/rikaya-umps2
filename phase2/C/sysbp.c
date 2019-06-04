@@ -24,23 +24,33 @@ extern void sysbp_init() {
 extern void sysbp() {
   /* Keeps the time spent in Kernel Mode */
   unsigned int kernel_start_time = get_microseconds();
-	
+
   state_t *old_area = (state_t *)SYSBP_OAREA;
 
+  uint32_t ret = 0;
   /* Register a0 tells us which syscall is being called
    * For a complete list, see sysbp.h
    */
   switch (old_area->reg_a0) {
-    /* case SYS1: ...
-     * case SYS2: ...
-     */
+    case CREATEPROCESS:
+      ret = Create_Process((state_t *)old_area->reg_a1, (int)old_area->reg_a2, (void **)old_area->reg_a3);
+      break;
+
+    case PASSEREN:
+      Passeren((int *)old_area->reg_a1);
+      break;
+
+    case VERHOGEN:
+      Verhogen((int *)old_area->reg_a1);
+      break;
   }
 
+  old_area->reg_v0 = ret;
   old_area->pc_epc += WORD_SIZE;
-  
+
   /* Updates process times */
   cur_proc->p_kernel_time += get_microseconds() - kernel_start_time;
-  
+
   LDST(old_area);
 }
 
@@ -58,18 +68,20 @@ extern void Get_CPU_Time(unsigned int *user, unsigned int *kernel, unsigned int 
  * 0 if successfull, -1 otherwise */
 extern int Create_Process(state_t *statep, int priority, void **cpid) {
 	pcb_t *new_proc = allocPcb();
+  if (cpid)
+    *cpid = new_proc;
 	if (!new_proc)
 	  return -1;
 	/* Set priority */
-  new_proc->priority = new_proc->original_priority = priority; 
-	
+  new_proc->priority = new_proc->original_priority = priority;
+
 	/* Set state */
 	memcpy(statep, &new_proc->p_s, sizeof(state_t));
-	
+
 	/* Set start_time */
   /* new_proc->p_start_time = get_microseconds(); */
   insertChild(cur_proc, new_proc);
-  
+  insertProcQ(&ready_queue, new_proc);
   return 0;
 }
 
@@ -100,12 +112,12 @@ extern void Terminate_Process() {
    */
 
   /* Run the scheduler to carry on with the execution */
-  scheduler();	
+  scheduler();
 }
 
 /* Verhogen: free a semaphore */
 extern void Verhogen(int *semaddr) {
-	pcb_t *process; 
+	pcb_t *process;
 
   *semaddr += 1;
 
@@ -147,7 +159,7 @@ extern void Wait_Clock() {
 /* Activates an I/O operation inside the register field of the indicated device by coping the command parameter;
  * Blocking operation */
 extern int Do_IO(unsigned int command, unsigned int *reg) {
-	
+
 }
 
 /* Current process now takes as children the parentless processes */
@@ -156,5 +168,5 @@ extern void Set_Tutor() {
 
 /*  */
 extern int Spec_Passup(int type, state_t *old, state_t *new) {
-	
+
 }
