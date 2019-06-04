@@ -16,9 +16,6 @@ struct list_head ready_queue;
 /* Pcb of the process currently in execution */
 struct pcb_t *cur_proc;
 
-/* Pcb of the current tutor */
-struct pcb_t cur_tutor;
-
 /* Make empty queues for the scheduler */
 extern void scheduler_init() {
   mkEmptyProcQ(&ready_queue);
