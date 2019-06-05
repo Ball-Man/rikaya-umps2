@@ -117,33 +117,53 @@ extern void Terminate_Process() {
   scheduler();
 }
 
-/* Verhogen: free a semaphore */
-extern void Verhogen(int *semaddr) {
-	pcb_t *process;
+/* Virtual Verhogen: returns the freed pcb */
+extern pcb_t *vVerhogen(int *semaddr) {
+  pcb_t *process;
 
   *semaddr += 1;
 
-	if (*semaddr <= 0) {
+  if (*semaddr <= 0) {
     /* Wake up one process and reset process priority */
     process = removeBlocked(semaddr);
     process->priority = process->original_priority;
-		insertProcQ(&ready_queue, process);
-    /* scheduler();     NOTE: we're not giving away our quantum */
-	}
+    return process;
+  }
+
+  return NULL;
+}
+
+/* Verhogen: free a pcb from semaphore */
+extern void Verhogen(int *semaddr) {
+	pcb_t *process = vVerhogen(semaddr);   /* Use virtual verhogen */
+
+  if (process)
+    insertProcQ(&ready_queue, process);
+  /* scheduler();     NOTE: we're not giving away our quantum */
+}
+
+/* Virtual Passeren: (eventually) block the given pcb on the semaphore */
+extern bool vPasseren(int *semaddr, pcb_t* proc) {
+  *semaddr -= 1;
+
+  if (*semaddr < 0) {
+    /* (eventually) remove proc from the ready queue and push it  */
+    outProcQ(&ready_queue, proc);
+    insertBlocked(semaddr, proc);
+    return true;
+  }
+
+  return false;
 }
 
 /* Passeren: require a semaphore */
 extern void Passeren(int *semaddr) {
   state_t *old_area = (state_t *)SYSBP_OAREA;
+  bool blocked = vPasseren(semaddr, cur_proc);  /* Use virtual passeren */
 
-  *semaddr -= 1;
-
-  if (*semaddr < 0) {
-    /* Save state of cur_proc and push it in the semd queue */
-    /* NOTE: its priority is still aged. The original priority will be set with Verhogen */
+  if (blocked) {
     old_area->pc_epc += WORD_SIZE;
     memcpy(old_area, &cur_proc->p_s, sizeof(state_t));
-    insertBlocked(semaddr, outProcQ(&ready_queue, cur_proc));
     cur_proc = NULL;
 
     /* Schedule new process */

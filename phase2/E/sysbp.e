@@ -2,6 +2,7 @@
 #define PHASE2_SYSBP_E_
 
 #include <umps/types.h>
+#include <pcb.h>
 
 /* Wait_Clock semaphore */
 extern int clock_semaphore;
@@ -26,8 +27,12 @@ extern void Terminate_Process();
 /*  */
 extern void Verhogen(int *semaddr);
 
+extern pcb_t *vVerhogen(int *semaddr);
+
 /*  */
 extern void Passeren(int *semaddr);
+
+extern bool vPasseren(int *semaddr, pcb_t *proc);
 
 /* Waits a clock tick (100 ms) */
 extern void Wait_Clock();
