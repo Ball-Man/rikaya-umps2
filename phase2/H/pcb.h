@@ -25,7 +25,6 @@ typedef struct pcb_t {
   /* I/O management */
   uint32_t io_command;
   uint8_t io_transm;
-  uint32_t io_status;
 } pcb_t;
 
 #endif

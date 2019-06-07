@@ -105,7 +105,7 @@ extern void interrupt() {
           /* Free waiting process */
           if (dev_cur_semaphores[j + (i - 3) * N_DEV_PER_IL]) {
             freed_proc = vVerhogen(&dev_cur_semaphores[j + (i - 3) * N_DEV_PER_IL]);
-            freed_proc->io_status = dev->status;
+            freed_proc->p_s.reg_v0 = dev->status;
             insertProcQ(&ready_queue, freed_proc);
           }
 
@@ -137,12 +137,12 @@ extern void interrupt() {
           /* Free waiting process */
           if (term_cur_semaphores[0][i]) {
             freed_proc = vVerhogen(&term_cur_semaphores[0][i]);
-            freed_proc->io_status = term->recv_status;
+            freed_proc->p_s.reg_v0 = term->recv_status;
             insertProcQ(&ready_queue, freed_proc);
           }
 
           term->recv_command = DEV_CMD_ACK;
-          while((rc_status = (term->recv_status) & TERM_STATUS_MASK) != DEV_ST_READY); /* Wait for ack processing */
+          while((term->recv_status & TERM_STATUS_MASK) != DEV_ST_READY); /* Wait for ack processing */
 
           /* Next waiting process */
           if (term_semaphores[0][i]) {
@@ -160,8 +160,9 @@ extern void interrupt() {
             freed_proc->p_s.reg_v0 = term->transm_status;
             insertProcQ(&ready_queue, freed_proc);
           }
+
           term->transm_command = DEV_CMD_ACK;
-          while((tr_status = (term->transm_status) & TERM_STATUS_MASK) != DEV_ST_READY); /* Wait for ack processing */
+          while((term->transm_status & TERM_STATUS_MASK) != DEV_ST_READY); /* Wait for ack processing */
 
           /* Next waiting process */
           if (term_semaphores[1][i]) {
