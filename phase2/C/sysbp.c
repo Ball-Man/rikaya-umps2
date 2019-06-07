@@ -2,6 +2,7 @@
 #include <sysbp.h>
 
 #include <terminal.e>
+#include <interrupt.e>
 #include <umps/libumps.h>
 #include <umps/arch.h>
 #include <scheduler.e>
@@ -18,45 +19,9 @@ extern void sysbp_init() {
   clock_semaphore = 0;
 }
 
-/* Main handler for system calls and breakpoints
- * NOTE: Breakpoints not handled in this phase
- */
-extern void sysbp() {
-  /* Keeps the time spent in Kernel Mode */
-  unsigned int kernel_start_time = get_microseconds();
-
-  state_t *old_area = (state_t *)SYSBP_OAREA;
-
-  uint32_t ret = 0;
-  /* Register a0 tells us which syscall is being called
-   * For a complete list, see sysbp.h
-   */
-  switch (old_area->reg_a0) {
-    case CREATEPROCESS:
-      ret = Create_Process((state_t *)old_area->reg_a1, (int)old_area->reg_a2, (void **)old_area->reg_a3);
-      break;
-
-    case PASSEREN:
-      Passeren((int *)old_area->reg_a1);
-      break;
-
-    case VERHOGEN:
-      Verhogen((int *)old_area->reg_a1);
-      break;
-  }
-
-  old_area->reg_v0 = ret;
-  old_area->pc_epc += WORD_SIZE;
-
-  /* Updates process times */
-  cur_proc->p_kernel_time += get_microseconds() - kernel_start_time;
-
-  LDST(old_area);
-}
-
 /* Handlers for every system call... */
 /* Returns User time, Kernel time and Total time */
-extern void Get_CPU_Time(unsigned int *user, unsigned int *kernel, unsigned int *wallclock) {
+HIDDEN void Get_CPU_Time(unsigned int *user, unsigned int *kernel, unsigned int *wallclock) {
 	/* Kernel and User time stored, the sum is the total time */
 	*kernel = cur_proc->p_kernel_time;
 	*user = cur_proc->p_user_time;
@@ -66,7 +31,7 @@ extern void Get_CPU_Time(unsigned int *user, unsigned int *kernel, unsigned int 
 /* Create a child process for the current process; PC and $SP are in statep, cpid contains
  * the child process' ID;
  * 0 if successfull, -1 otherwise */
-extern int Create_Process(state_t *statep, int priority, void **cpid) {
+HIDDEN int Create_Process(state_t *statep, int priority, void **cpid) {
 	pcb_t *new_proc = allocPcb();
 
   if (cpid)
@@ -88,7 +53,7 @@ extern int Create_Process(state_t *statep, int priority, void **cpid) {
 }
 
 /* Handler for sys3: terminate current process and its tree */
-extern void Terminate_Process() {
+HIDDEN void Terminate_Process() {
   struct list_head q;
   struct list_head *pos;
   pcb_t *parent;
@@ -162,8 +127,8 @@ extern void Passeren(int *semaddr) {
   bool blocked = vPasseren(semaddr, cur_proc);  /* Use virtual passeren */
 
   if (blocked) {
-    old_area->pc_epc += WORD_SIZE;
     memcpy(old_area, &cur_proc->p_s, sizeof(state_t));
+    cur_proc->p_s.pc_epc += WORD_SIZE;
     cur_proc = NULL;
 
     /* Schedule new process */
@@ -179,16 +144,63 @@ extern void Wait_Clock() {
 }
 
 /* Activates an I/O operation inside the register field of the indicated device by coping the command parameter;
- * Blocking operation */
-extern int Do_IO(unsigned int command, unsigned int *reg) {
-
+ * Blocking operation
+ * NOTE: transm is used to select between the two subdevices inside the terminal device.
+ *       transm = 0 means the transmitting subdevice is selected.
+ *       transm = 1 means the receiving subdevice is selected.
+ *       any other value will break everything
+ */
+HIDDEN void Do_IO(unsigned int command, unsigned int *reg, uint8_t transm) {
+  cur_proc->io_command = command;
+  cur_proc->io_transm = 1 - transm;
+  interrupt_io_command(cur_proc, (devreg_t *)reg);
 }
 
 /* Current process now takes as children the parentless processes */
-extern void Set_Tutor() {
+HIDDEN void Set_Tutor() {
 }
 
 /*  */
-extern int Spec_Passup(int type, state_t *old, state_t *new) {
+HIDDEN int Spec_Passup(int type, state_t *old, state_t *new) {
 
+}
+
+/* Main handler for system calls and breakpoints
+ * NOTE: Breakpoints not handled in this phase
+ */
+extern void sysbp() {
+  /* Keeps the time spent in Kernel Mode */
+  unsigned int kernel_start_time = get_microseconds();
+
+  state_t *old_area = (state_t *)SYSBP_OAREA;
+
+  uint32_t ret = 0;
+  /* Register a0 tells us which syscall is being called
+   * For a complete list, see sysbp.h
+   */
+  switch (old_area->reg_a0) {
+    case CREATEPROCESS:
+      ret = Create_Process((state_t *)old_area->reg_a1, (int)old_area->reg_a2, (void **)old_area->reg_a3);
+      break;
+
+    case PASSEREN:
+      Passeren((int *)old_area->reg_a1);
+      break;
+
+    case VERHOGEN:
+      Verhogen((int *)old_area->reg_a1);
+      break;
+
+    case WAITIO:
+      Do_IO((uint32_t)old_area->reg_a1, (uint32_t *)old_area->reg_a2, (uint8_t)old_area->reg_a3);
+      break;
+  }
+
+  old_area->reg_v0 = ret;
+  old_area->pc_epc += WORD_SIZE;
+
+  /* Updates process times */
+  cur_proc->p_kernel_time += get_microseconds() - kernel_start_time;
+
+  LDST(old_area);
 }

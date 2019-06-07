@@ -9,6 +9,7 @@
 #include <pcb.e>
 #include <terminal.e>
 #include <const.h>
+#include <sysbp.h>
 
 /* List of processes waiting to be executed */
 struct list_head ready_queue;
@@ -61,8 +62,7 @@ extern bool scheduler_add(memaddr pc, int priority) {
   /* Set state */
   new_proc->p_s.pc_epc = pc;
   new_proc->p_s.reg_sp = RAMTOP - FRAMESIZE * (getPcbOffset(new_proc) + 1);
-  new_proc->p_s.status = ST_PREV_INTERRUPTS | ST_LCL_TIMER | ST_CP0
-    | (ST_IM_ALL - 0x8000);
+  new_proc->p_s.status = ST_PREV_INTERRUPTS | ST_LCL_TIMER | ST_IM_ALL;
   /* 0x8000 is the mask bit for terminal device interrupts. I'm masking it since
    * it's triggered by the terminal operations executed by the test functions.
    * Complete support for device interrupts is coming in the next phase.

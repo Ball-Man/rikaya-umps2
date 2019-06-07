@@ -24,8 +24,7 @@ void system() {
   memset(&test_s, 0, sizeof(test_s));
   test_s.pc_epc = (memaddr)test;
   test_s.reg_sp = RAMTOP - FRAMESIZE * 2;  /* First stack is for the system process */
-  test_s.status = ST_PREV_INTERRUPTS | ST_LCL_TIMER | ST_CP0
-    | (ST_IM_ALL - 0x8000);
+  test_s.status = ST_PREV_INTERRUPTS | ST_LCL_TIMER | ST_IM_ALL;
   SYSCALL(CREATEPROCESS, (int)&test_s, 1, 0);
   
   while (1);

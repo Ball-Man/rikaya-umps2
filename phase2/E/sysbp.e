@@ -13,38 +13,16 @@ extern void sysbp_init();
 /* Main handler for system calls and breakpoints */
 extern void sysbp();
 
-/* Returns User time, Kernel time and Total time */
-extern void Get_CPU_Time(unsigned int *user, unsigned int *kernel, unsigned int *wallclock);
-
-/* Create a child process for the current process; PC and $SP are in statep, cpid contains
- * the child process' ID;
- * 0 if successfull, -1 otherwise */
-extern int Create_Process(state_t *statep, int priority, void **cpid);
-
-/* Handler for sys3: terminate current process and its tree */
-extern void Terminate_Process();
-
-/*  */
-extern void Verhogen(int *semaddr);
-
+/* Virtual Verhogen: returns the freed pcb */
 extern pcb_t *vVerhogen(int *semaddr);
 
-/*  */
-extern void Passeren(int *semaddr);
-
+/* Virtual Passeren: (eventually) block the given pcb on the semaphore */
 extern bool vPasseren(int *semaddr, pcb_t *proc);
 
-/* Waits a clock tick (100 ms) */
-extern void Wait_Clock();
+/* Verhogen: free a pcb from semaphore */
+extern void Verhogen(int *semaddr);
 
-/* Activates an I/O operation inside the register field of the indicated device by coping the command parameter;
- * Blocking operation */
-extern int Do_IO(unsigned int command, unsigned int *reg);
-
-/* Current process now takes as children the parentless processes */
-extern void Set_Tutor();
-
-/*  */
-extern int Spec_Passup(int type, state_t *old, state_t *new);
+/* Passeren: require a semaphore */
+extern void Passeren(int *semaddr);
 
 #endif

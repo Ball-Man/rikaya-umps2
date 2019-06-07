@@ -2,6 +2,7 @@
 #define PHASE15_INTERRUPT_E_
 
 #include <umps/arch.h>
+#include <pcb.e>
 
 /* Array of semaphores for the I/O queues
  * Lines: 3, ..., 6
@@ -20,6 +21,9 @@ extern int term_semaphores[2][N_DEV_PER_IL];
 
 /* Inits the module(sempaphores to 0, mainly) */
 extern void interrupt_init();
+
+/* Asks for an IO operation (proc is the sender of the request, reg is the requested device) */
+extern void interrupt_io_command(pcb_t *proc, devreg_t *reg);
 
 /* Main handler for interrupts */
 extern void interrupt();
