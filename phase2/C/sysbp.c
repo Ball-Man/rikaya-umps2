@@ -52,16 +52,43 @@ HIDDEN int Create_Process(state_t *statep, int priority, void **cpid) {
   return 0;
 }
 
-/* Handler for sys3: terminate current process and its tree */
-HIDDEN void Terminate_Process(void **pid) {
+/* Terminates the process corresponding to the given pid. if NULL(0), the target is
+ * the current executing process.
+ * The function is successful only if the target process is a descendant of cur_proc.
+ */
+HIDDEN int Terminate_Process(void **pid) {
+  pcb_t *proc = (pid) ? *pid : cur_proc;
+  pcb_t *parent = NULL;
+  bool allowed = false;
 
-  /* At this point all the terminated processes may be freed with freePcb.
-   * However, this function is going to work very differently in the next phase
-   * so it probably doesn't matter too much.
-   */
+  if (!proc->p_parent)  /* If the current process has no parent(meaning it's the */
+    return -1;          /* root process, return an error status. */
+  
+  /* Check if the target process is a descendant of cur_proc */
+  if (proc == cur_proc)
+    allowed = true;
+  else
+    while ((parent = proc->p_parent))
+      if (parent == cur_proc)
+        allowed = true;
 
-  /* Run the scheduler to carry on with the execution */
-  scheduler();
+  if (!allowed)   /* If not, return an error */
+    return -1;
+
+  parent = proc;
+  /* Search for a tutor */
+  while (!(parent = parent->p_parent)->tutor);
+  /* 'parent' now contains a pointer to a tutor pcb(root process is always tutor) */
+
+  list_splice(&proc->p_child ,&parent->p_child);
+  freePcb(outProcQ(&ready_queue, proc));
+
+  if (proc == cur_proc) {
+    cur_proc = NULL;
+    scheduler();
+  }
+
+  return 0;
 }
 
 /* Virtual Verhogen: returns the freed pcb */
@@ -163,6 +190,9 @@ extern void sysbp() {
     case CREATEPROCESS:
       ret = Create_Process((state_t *)old_area->reg_a1, (int)old_area->reg_a2, (void **)old_area->reg_a3);
       break;
+
+    case TERMINATEPROCESS:
+      ret = Terminate_Process((void **)old_area->reg_a1);
 
     case PASSEREN:
       Passeren((int *)old_area->reg_a1);
