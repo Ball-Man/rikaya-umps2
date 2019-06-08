@@ -53,25 +53,7 @@ HIDDEN int Create_Process(state_t *statep, int priority, void **cpid) {
 }
 
 /* Handler for sys3: terminate current process and its tree */
-HIDDEN void Terminate_Process() {
-  struct list_head q;
-  struct list_head *pos;
-  pcb_t *parent;
-
-  mkEmptyProcQ(&q);
-
-  /* Add the current executing process to the queue, and remove from execution */
-  list_add_tail(&outProcQ(&ready_queue, cur_proc)->p_next, &q);
-  cur_proc = NULL;
-
-  while ((parent = removeProcQ(&q))) {
-    /* Check if the children queue is empty or not defined */
-    if (!emptyProcQ(&parent->p_child) && parent->p_child.next)
-      /* Cycle through the children and remove from them from the ready queue */
-      list_for_each(pos, &parent->p_child)
-        list_add_tail(
-          &outProcQ(&ready_queue, list_entry(pos, pcb_t, p_sib))->p_next, &q);
-  }
+HIDDEN void Terminate_Process(void **pid) {
 
   /* At this point all the terminated processes may be freed with freePcb.
    * However, this function is going to work very differently in the next phase
@@ -138,9 +120,7 @@ extern void Passeren(int *semaddr) {
 
 /* Waits a clock tick (100 ms) */
 extern void Wait_Clock() {
-	Passeren(0);
-	delay_ms(100);
-	Verhogen(0);
+  Passeren(&clock_semaphore); 
 }
 
 /* Activates an I/O operation inside the register field of the indicated device by coping the command parameter;
@@ -158,6 +138,7 @@ HIDDEN void Do_IO(unsigned int command, unsigned int *reg, uint8_t transm) {
 
 /* Current process now takes as children the parentless processes */
 HIDDEN void Set_Tutor() {
+  cur_proc->tutor = true;
 }
 
 /*  */
@@ -191,8 +172,16 @@ extern void sysbp() {
       Verhogen((int *)old_area->reg_a1);
       break;
 
+    case WAITCLOCK:
+      Wait_Clock();
+      break;
+
     case WAITIO:
       Do_IO((uint32_t)old_area->reg_a1, (uint32_t *)old_area->reg_a2, (uint8_t)old_area->reg_a3);
+      break;
+
+    case SETTUTOR:
+      Set_Tutor();
       break;
   }
 

@@ -22,3 +22,8 @@ extern void delay_ms(unsigned int ms)
   while (get_microseconds() - start <= ms * 1000)
     ;
 }
+
+/* Set interval timer to the desired amount of cpy cycles */
+extern void set_interval_timer(uint32_t cycles) {
+  *((uint32_t *)INTERVAL_TIMER) = cycles;
+}

@@ -11,6 +11,7 @@ typedef struct pcb_t {
   struct pcb_t* p_parent;
   struct list_head p_child;
   struct list_head p_sib;
+  bool tutor;
 
   /* Scheduling and semaphores */
   int priority;

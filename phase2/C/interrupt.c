@@ -8,6 +8,7 @@
 #include <lang.e>
 #include <const.h>
 #include <scheduler.e>
+#include <time.e>
 
 /* Array of pcbs which have already sent a command and are waiting for a response */
 HIDDEN int dev_cur_semaphores[N_DEV_PER_IL * (N_EXT_IL - 1)];
@@ -48,6 +49,9 @@ extern void interrupt_init() {
   memset(term_semaphores, 0, sizeof(term_semaphores));
   memset(dev_cur_semaphores, 0, sizeof(dev_cur_semaphores));
   memset(term_cur_semaphores, 0, sizeof(term_cur_semaphores));
+
+  /* Starts system clock */
+  set_interval_timer(get_timer_value(SYSTEM_CLOCK_MS));
 }
 
 /* Asks for an IO operation (proc is the sender of the request, reg is the requested device) */
@@ -90,9 +94,11 @@ extern void interrupt() {
   if (get_line_pending(1)) /* If the local timer interrupt is pending */
     scheduler();
   if (get_line_pending(2)) { /* The interval timer interrupt is pending */
-    freed_proc = vVerhogen(&clock_semaphore);
-    if (freed_proc)
+    while ((freed_proc = vVerhogen(&clock_semaphore)))     /* Free all the processes */
       insertProcQ(&ready_queue, freed_proc);
+
+    /* Set new timer */
+    set_interval_timer(get_timer_value(SYSTEM_CLOCK_MS));
   }
   
   /* I/O devices' interrupt lines */
