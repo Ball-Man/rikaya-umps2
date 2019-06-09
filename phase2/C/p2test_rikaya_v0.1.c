@@ -492,7 +492,8 @@ void p4() {
 /* p5's program trap handler */
 void p5prog() {
 	unsigned int exeCode = pstat_o.cause;
-	exeCode = exeCode & CAUSEMASK;
+	/*exeCode = exeCode & CAUSEMASK;*/
+	exeCode = (exeCode >> 2) & 0x1F;
 
 	switch (exeCode) {
 		case EXC_BUSINVFETCH:
@@ -527,7 +528,7 @@ void p5prog() {
 void p5mm() {
 	print("memory management (tlb) trap - set user mode on\n");
 	mstat_o.status = mstat_o.status & 0xFFFFFFF0;  /* user mode on */
-	mstat_o.status &= ~(0x1); /* disable VM */
+	mstat_o.status &= ~(0x07000000); /* disable VM */
 	mstat_o.pc_epc = (memaddr)p5b;  /* return to p5b */
 	mstat_o.reg_sp = p5Stack-FRAME_SIZE;				/* Start with a fresh stack */
 
@@ -590,7 +591,7 @@ void p5a() {
 	/* generate a TLB exception by turning on VM without setting up the 
 		 seg tables */
 	p5Status = getSTATUS();
-	p5Status = p5Status | 0x00000001;
+	p5Status = p5Status | 0x01000000;
 	setSTATUS(p5Status);
 }
 
@@ -734,6 +735,7 @@ void curiousleaf() {
 	pid_t parentid;
 	print("leaf process starts\n");
 
+	SYSCALL(GETPID, 0, (int)&parentid, 0);
 	if (SYSCALL(TERMINATEPROCESS, (int)&parentid, 0, 0) == 0) {
     print("error: curiousleaf killed its parent\n");
     PANIC();

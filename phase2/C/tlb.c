@@ -9,6 +9,7 @@
 
 extern void tlb() {
   state_t *old_area = (state_t *)TLB_OAREA;
+  old_area->pc_epc += WORD_SIZE;
 
   if (!cur_proc->spec_set[SPEC_TYPE_TLB])
     Terminate_Process(0);

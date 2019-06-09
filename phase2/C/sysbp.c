@@ -78,10 +78,9 @@ extern int Terminate_Process(void **pid) {
     allowed = true;
   else {
     parent = proc;
-    while ((parent = parent->p_parent)) {
+    while ((parent = parent->p_parent))
       if (parent == cur_proc)
         allowed = true;
-    }
   }
 
   if (!allowed)   /* If not, return an error */
@@ -235,6 +234,7 @@ extern void sysbp() {
   if (((old_area->cause >> 2) & 0x1F) == CAUSE_BP) {
     if (!cur_proc->spec_set[SPEC_TYPE_SYSBP])
       Terminate_Process(0);
+    old_area->pc_epc += WORD_SIZE;
     memcpy(old_area, cur_proc->spec_oarea[SPEC_TYPE_SYSBP], sizeof(state_t));
     LDST(cur_proc->spec_narea[SPEC_TYPE_SYSBP]);
   }
@@ -279,7 +279,7 @@ extern void sysbp() {
       break;
 
     case SPECPASSUP:
-      Spec_Passup((int)old_area->reg_a1, (state_t *)old_area->reg_a2, (state_t *)old_area->reg_a3);
+      ret = Spec_Passup((int)old_area->reg_a1, (state_t *)old_area->reg_a2, (state_t *)old_area->reg_a3);
       break;
 
     case GETPID:
@@ -291,6 +291,7 @@ extern void sysbp() {
       if (!cur_proc->spec_set[SPEC_TYPE_SYSBP])
         Terminate_Process(0);
 
+      old_area->pc_epc += WORD_SIZE;
       memcpy(old_area, cur_proc->spec_oarea[SPEC_TYPE_SYSBP], sizeof(state_t));
       LDST(cur_proc->spec_narea[SPEC_TYPE_SYSBP]);
       break;
