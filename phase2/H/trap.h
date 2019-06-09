@@ -1,0 +1,7 @@
+#ifndef PHASE2_TRAP_H_
+#define PHASE2_TRAP_H_
+
+#define TRAP_NAREA 0x200002BC
+#define TRAP_OAREA 0x20000230
+
+#endif

@@ -7,10 +7,14 @@
 #include <init.e>
 #include <sysbp.e>
 #include <interrupt.e>
+#include <trap.e>
+#include <tlb.e>
 #include <pcb.e>
 #include <semd.e>
 #include <sysbp.h>
 #include <interrupt.h>
+#include <trap.h>
+#include <tlb.h>
 #include <lang.e>
 #include <list.h>
 #include <const.h>
@@ -43,6 +47,8 @@ void main() {
   /* Init New Areas */
   init_newarea(SYSBP_NAREA, (memaddr)sysbp);
   init_newarea(INTERRUPT_NAREA, (memaddr)interrupt);
+  init_newarea(TLB_NAREA, (memaddr)tlb);
+  init_newarea(TRAP_NAREA, (memaddr)trap);
 
   /* Init sysbp module */
   sysbp_init();

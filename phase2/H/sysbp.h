@@ -7,8 +7,14 @@
 #define SYSBP_NAREA 0x200003D4
 #define SYSBP_OAREA 0x20000348
 
+#define CAUSE_SYSCALL 8
+#define CAUSE_BP      9
+
+#define SPEC_TYPE_SYSBP 0
+#define SPEC_TYPE_TLB   1
+#define SPEC_TYPE_TRAP  2
+
 /* System calls */
-/* Maybe rename them with more significant names..? */
 #define SYS1 1
 #define SYS2 2
 #define SYS3 3

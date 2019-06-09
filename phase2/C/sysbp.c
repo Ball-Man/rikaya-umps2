@@ -14,9 +14,22 @@
 /* Wait_Clock semaphore */
 int clock_semaphore;
 
+/* New and old areas for the specpassup syscall */
+state_t *spec_narea[3],
+        *spec_oarea[3];
+
+/* spec_set[i] is true if the specpassup syscall has already been called
+ * for type = i.
+ */
+bool spec_set[3];
+
 /* Initialize the sysbp module */
 extern void sysbp_init() {
   clock_semaphore = 0;
+
+  memset(spec_narea, 0, sizeof(spec_narea));
+  memset(spec_oarea, 0, sizeof(spec_oarea));
+  memset(spec_set, 0, sizeof(spec_set));
 }
 
 /* Handlers for every system call... */
@@ -67,7 +80,7 @@ HIDDEN int Create_Process(state_t *statep, int priority, void **cpid) {
  * the current executing process.
  * The function is successful only if the target process is a descendant of cur_proc.
  */
-HIDDEN int Terminate_Process(void **pid) {
+extern int Terminate_Process(void **pid) {
   pcb_t *proc = (pid) ? *pid : cur_proc;
   pcb_t *parent = NULL;
   bool allowed = false;
@@ -184,9 +197,26 @@ HIDDEN void Set_Tutor() {
   cur_proc->tutor = true;
 }
 
-/*  */
+/* Assign a superior level handler for a specific exception(type).
+ * Should be called maximum once per type. Returns 0 on success, -1 on error. 
+ */
 HIDDEN int Spec_Passup(int type, state_t *old, state_t *new) {
+  if (spec_set[type])
+    return -1;
+  spec_set[type] = true;  /* Can be called one time per type */
+  
+  spec_oarea[type] = old;
+  spec_narea[type] = new;
 
+  return 0;
+}
+
+/* Get current process' pid and its parent's pid */
+HIDDEN void Get_pid_ppid(void **pid, void **ppid) {
+  if (pid)
+    *pid = cur_proc;
+  if (ppid)
+    *ppid = cur_proc->p_parent;
 }
 
 /* Main handler for system calls and breakpoints
@@ -202,6 +232,17 @@ extern void sysbp() {
   }
   cur_proc->p_kernelt_start = TOD_LO;
 
+  /* Distinguish between syscall and bp */
+
+  /* If it's a breakpoint, call superior handler */
+  if (((old_area->cause >> 2) & 0x1F) == CAUSE_BP) {
+    if (!spec_set[SPEC_TYPE_SYSBP])
+      Terminate_Process(0);
+    memcpy(old_area, spec_oarea[SPEC_TYPE_SYSBP], sizeof(state_t));
+    LDST(spec_narea[SPEC_TYPE_SYSBP]);
+  }
+
+  /* If it's a syscall... */
   /* Syscall return management */
   uint32_t ret = 0;
 
@@ -238,6 +279,23 @@ extern void sysbp() {
 
     case SETTUTOR:
       Set_Tutor();
+      break;
+
+    case SPECPASSUP:
+      Spec_Passup((int)old_area->reg_a1, (state_t *)old_area->reg_a2, (state_t *)old_area->reg_a3);
+      break;
+
+    case GETPID:
+      Get_pid_ppid((void **)old_area->reg_a1, (void **)old_area->reg_a2);
+      break;
+
+    /* Superior level handler */
+    default:
+      if (!spec_set[SPEC_TYPE_SYSBP])
+        Terminate_Process(0);
+
+      memcpy(old_area, spec_oarea[SPEC_TYPE_SYSBP], sizeof(state_t));
+      LDST(spec_narea[SPEC_TYPE_SYSBP]);
       break;
   }
 

@@ -7,11 +7,18 @@
 /* Wait_Clock semaphore */
 extern int clock_semaphore;
 
+extern state_t *spec_oarea[3];
+extern state_t *spec_narea[3];
+extern bool spec_set[3];
+
 /* Initialize the sysbp module */
 extern void sysbp_init();
 
 /* Main handler for system calls and breakpoints */
 extern void sysbp();
+
+/* Terminates given process */
+extern int Terminate_Process(void **pid);
 
 /* Virtual Verhogen: returns the freed pcb */
 extern pcb_t *vVerhogen(int *semaddr);
