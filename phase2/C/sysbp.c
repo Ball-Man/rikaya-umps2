@@ -43,7 +43,7 @@ HIDDEN int Create_Process(state_t *statep, int priority, void **cpid) {
 	pcb_t *new_proc = allocPcb();
 
   if (cpid)
-    *cpid = new_proc;
+    *((pcb_t **)cpid) = new_proc;
 
 	if (!new_proc)
 	  return -1;
@@ -66,20 +66,23 @@ HIDDEN int Create_Process(state_t *statep, int priority, void **cpid) {
  * The function is successful only if the target process is a descendant of cur_proc.
  */
 extern int Terminate_Process(void **pid) {
-  pcb_t *proc = (pid) ? *pid : cur_proc;
+  pcb_t *proc = (pid) ? *((pcb_t **)pid) : cur_proc;
   pcb_t *parent = NULL;
   bool allowed = false;
 
   if (!proc->p_parent)  /* If the current process has no parent(meaning it's the */
     return -1;          /* root process, return an error status. */
-  
+
   /* Check if the target process is a descendant of cur_proc */
   if (proc == cur_proc)
     allowed = true;
-  else
-    while ((parent = proc->p_parent))
+  else {
+    parent = proc;
+    while ((parent = parent->p_parent)) {
       if (parent == cur_proc)
         allowed = true;
+    }
+  }
 
   if (!allowed)   /* If not, return an error */
     return -1;
@@ -89,9 +92,17 @@ extern int Terminate_Process(void **pid) {
   while (!(parent = parent->p_parent)->tutor);
   /* 'parent' now contains a pointer to a tutor pcb(root process is always tutor) */
 
-  outChild(proc);
-  list_splice(&parent->p_child, &proc->p_child);
-  freePcb(outProcQ(&ready_queue, proc));
+  if (proc->p_semKey) { /* Remove from blocked semaphore and fix the semaphore if necessary */
+    *proc->p_semKey += 1;
+    outChild(proc);
+  }
+
+  while (!emptyChild(proc))
+    insertChild(parent, removeChild(proc));
+
+  outBlocked(proc);   /* Remove from semd if necessary */
+  outProcQ(&ready_queue, proc);   /* Remove from ready queue if necessary */
+  freePcb(proc);
 
   if (proc == cur_proc) {
     cur_proc = NULL;

@@ -20,6 +20,10 @@
 #include <const.h>
 #include <sysbp.h>
 
+void test1() {
+  while(1);
+}
+
 /* Root process */
 void system() {
   state_t test_s;
@@ -30,7 +34,7 @@ void system() {
   test_s.reg_sp = RAMTOP - FRAMESIZE * 2;  /* First stack is for the system process */
   test_s.status = ST_PREV_INTERRUPTS | ST_LCL_TIMER | ST_IM_ALL;
   SYSCALL(SETTUTOR, 0, 0, 0);
-  SYSCALL(CREATEPROCESS, (int)&test_s, 1, 0);
+  SYSCALL(CREATEPROCESS, (uint32_t)&test_s, 1, 0);
   
   while (1);
 }

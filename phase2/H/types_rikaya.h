@@ -6,29 +6,29 @@
 #include "const.h"
 
 typedef unsigned int memaddr;
-
-/* Process Control Block (PCB) data structure */
+/*
+/* Process Control Block (PCB) data structure 
 typedef struct pcb_t {
-	/*process queue fields */
+	/*process queue fields 
 	struct list_head	p_next;
 
-	/*process tree fields */
+	/*process tree fields 
 	struct pcb_t		*p_parent;
 	struct list_head	p_child,
 						p_sib;
 	
-	/* processor state, etc */
+	/* processor state, etc 
 	state_t       		p_s;     
 
-	/* process priority */
+	/* process priority 
 	int					priority;
 	int					original_priority;
 	
-	/* key of the semaphore on which the process is eventually blocked */
+	/* key of the semaphore on which the process is eventually blocked 
 	int					*p_semkey;
 } pcb_t;
 
-
+*/
 
 /* Semaphore Descriptor (SEMD) data structure */
 typedef struct semd_t {
