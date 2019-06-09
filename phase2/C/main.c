@@ -1,7 +1,7 @@
 #include <umps/arch.h>
 #include <umps/types.h>
 #include <umps/libumps.h>
-#include <p2test_rikaya_v0.e>
+#include <p2test_rikaya.e>
 #include <terminal.e>
 #include <scheduler.e>
 #include <init.e>

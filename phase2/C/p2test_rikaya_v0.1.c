@@ -20,8 +20,9 @@
  *      Modified by Mattia Maldini, Renzo Davoli 2019
  */
 
-#include <const_rikaya.h>
-#include <types_rikaya.h>
+#include "const_rikaya.h"
+#include "types_rikaya.h"
+/*#include <types.h> */
 #include <umps/libumps.h>
 #include <umps/arch.h>
 
@@ -48,7 +49,7 @@ typedef unsigned int pid_t;
 #define CAUSEMASK		0xFFFFFF
 #define VMOFF 			0xF8FFFFFF
 
-#define KUPBITON		0x8			//occhio!!
+#define KUPBITON		0x8			//nota bene
 #define KUPBITOFF		0xFFFFFFF7
 
 #define MINLOOPTIME		10000
@@ -87,10 +88,8 @@ SEMAPHORE term_mut=1,	/* for mutual exclusion on terminal */
 					endp4=0,		/* to signal demise of p4 */
 					endp5=0,		/* to signal demise of p5 */
 					endp8=0,		/* to signal demise of p8 */
-					blkp9=0,		/* used to block p9 process */
-					synp9=0,		/* used to sync with p9 */
 					endcreate=0,	/* for a p8 leaf to signal its creation */
-					blkp8=0;		/* to block p8 */
+					blkp8=1;		/* to block p8 */
 
 state_t p2state, p3state, p4state, p5state,	p6state, p7state;
 state_t p8rootstate, interchildstate, child1state, child2state;
@@ -112,11 +111,9 @@ memaddr *p5MemLocation = (memaddr*)0x34;		/* To cause a p5 trap */
 pid_t p4pid;
 pid_t testpid;
 pid_t childpid, intermediatepid, p8pid;
-int p9i;
 
 void	p2(),p3(),p4(),p5(),p5a(),p5b(),p6(),p7(),p7a(),p5prog(),p5mm();
 void	p5sys(),p8root(),child1(),child2(),p8leaf(),curiousleaf(), intermediate();
-void	p9();
 
 /* a procedure to print on terminal 0 */
 void print(char *msg) {
@@ -355,13 +352,19 @@ void p2() {
 	SYSCALL(GETCPUTIME, (int)&user_t2, (int)&kernel_t2, (int)&wallclock_t2);			/* CPU time used */
 	now2 = getTODLO();				/* time of day  */
 
-	if (((now2 - now1) >= (wallclock_t2 - wallclock_t1)) &&
-			((wallclock_t2 - wallclock_t1) >= MINLOOPTIME)) {
+	if (((user_t2 - user_t1) >= (kernel_t2 - kernel_t1)) &&
+			((wallclock_t2 - wallclock_t1) >= (user_t2 - user_t1)) &&
+			((now2 - now1) >= (wallclock_t2 - wallclock_t1)) &&
+			((user_t2 - user_t1) >= MINLOOPTIME)) {
 		print("p2 is OK\n");
 	} else {
+		if ((user_t2 - user_t1) < (kernel_t2 - kernel_t1))
+			print ("warning: here kernel time should be less than user time\n");
+		if ((wallclock_t2 - wallclock_t1) < (user_t2 - user_t1))
+			print ("error: more cpu time than wallclock time\n");
 		if ((now2 - now1) < (wallclock_t2 - wallclock_t1))
-			print ("error: more cpu time than real time\n");
-		if ((wallclock_t2 - wallclock_t1) < MINLOOPTIME)
+			print ("error: more wallclock time than real time\n");
+		if ((user_t2 - user_t1) < MINLOOPTIME)
 			print ("error: not enough cpu time went by\n");
 		print("p2 blew it!\n");
 	}
@@ -381,7 +384,7 @@ void p2() {
 /* p3 -- clock semaphore test process */
 void p3() {
 	cpu_t	time1, time2;
-	cpu_t	cpu_t1,cpu_t2;	/* cpu time used */
+	cpu_t	kernel_t1,kernel_t2;	/* cpu time used */
 	int	i;
 
 	time1 = 0;
@@ -398,14 +401,14 @@ void p3() {
 
 	/* now let's check to see if we're really charged for CPU
 		 time correctly */
-	cpu_t1 = SYSCALL(GETCPUTIME, 0, 0, 0);
+	SYSCALL(GETCPUTIME, 0, (int)&kernel_t1, 0);
 
 	for (i = 0; i < CLOCKLOOP; i++)
 		SYSCALL(WAITCLOCK, 0, 0, 0);
 
-	cpu_t2 = SYSCALL(GETCPUTIME, 0, 0, 0);
+	SYSCALL(GETCPUTIME, 0, (int)&kernel_t2, 0);
 
-	if ((cpu_t2 - cpu_t1) < MINCLOCKLOOP)
+	if ((kernel_t2 - kernel_t1) < MINCLOCKLOOP)
 		print("error: p3 - CPU time incorrectly maintained\n");
 	else
 		print("p3 - CPU time correctly maintained\n");
@@ -423,6 +426,7 @@ void p3() {
 /* p4 -- termination test process and getpid test */
 void p4() {
 	pid_t pid;
+	pid_t p42id;
 
 	switch (p4inc) {
 		case 1:
@@ -460,11 +464,11 @@ void p4() {
 	p4state.reg_sp -= FRAME_SIZE;		/* give another page  */
 
 	print("p4 create a new p4\n");
-	SYSCALL(CREATEPROCESS, (int)&p4state, DEFAULT_PRIORITY, 0);			/* start a new p4    */
+	SYSCALL(CREATEPROCESS, (int)&p4state, DEFAULT_PRIORITY, (int) &p42id);			/* start a new p4    */
 
 	SYSCALL(PASSEREN, (int)&synp4, 0, 0);				/* wait for it       */
 	print("p4 termination of the child\n");
-	if (SYSCALL(TERMINATEPROCESS, 0, 0, 0) < 0) {			/* terminate p4      */
+	if (SYSCALL(TERMINATEPROCESS, (int) &p42id, 0, 0) < 0) {			/* terminate p4      */
 		print("error: terminate process is wrong\n");
 		PANIC();
 	}
@@ -473,7 +477,7 @@ void p4() {
 
 	SYSCALL(VERHOGEN, (int)&endp4, 0, 0);				/* V(endp4)          */
 
-	print("p4 termination with the child\n");
+	print("p4 termination after the child\n");
 
 	SYSCALL(TERMINATEPROCESS, 0, 0, 0);			/* terminate p4      */
 
@@ -658,16 +662,18 @@ void p7() {
 /* the root process, and then terminate                               */
 void p8root() {
 	int		grandchild;
-	pid_t id;
 
 	print("p8root starts\n");
 
+	SYSCALL(PASSEREN, (int)&blkp8, 0, 0);
 	SYSCALL(CREATEPROCESS, (int)&child1state, DEFAULT_PRIORITY, (pid_t)&childpid);
-	SYSCALL(CREATEPROCESS, (int)&child2state, DEFAULT_PRIORITY, (pid_t)&id);
+	SYSCALL(CREATEPROCESS, (int)&child2state, DEFAULT_PRIORITY, 0);
 
 	for (grandchild=0; grandchild < NOLEAVES; grandchild++) {
 		SYSCALL(PASSEREN, (int)&endcreate, 0, 0);
 	}
+
+	SYSCALL(VERHOGEN, (int)&blkp8, 0, 0);
 
 	SYSCALL(VERHOGEN, (int)&endp8, 0, 0);
 
@@ -677,11 +683,10 @@ void p8root() {
 /*child1 & child2 -- create two sub-processes each*/
 
 void child1() {
-	int intermediateid;
 	print("child1 starts\n");
 
 	SYSCALL(SETTUTOR, 0, 0, 0);
-	SYSCALL(CREATEPROCESS, (int)&interchildstate, DEFAULT_PRIORITY, (int)&intermediateid);
+	SYSCALL(CREATEPROCESS, (int)&interchildstate, DEFAULT_PRIORITY, (int)&intermediatepid);
 
 	SYSCALL(PASSEREN, (int)&blkp8, 0, 0);
 	SYSCALL(VERHOGEN, (int)&blkp8, 0, 0);

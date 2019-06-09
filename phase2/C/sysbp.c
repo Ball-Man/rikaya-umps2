@@ -22,10 +22,18 @@ extern void sysbp_init() {
 /* Handlers for every system call... */
 /* Returns User time, Kernel time and Total time */
 HIDDEN void Get_CPU_Time(unsigned int *user, unsigned int *kernel, unsigned int *wallclock) {
-	/* Kernel and User time stored, the sum is the total time */
-	*kernel = cur_proc->p_kernel_time;
-	*user = cur_proc->p_user_time;
-	*wallclock = cur_proc->p_kernel_time + cur_proc->p_user_time;
+  /* Update time before returning it */
+  cur_proc->p_kernelt_total += TOD_LO - cur_proc->p_kernelt_start;
+  cur_proc->p_kernelt_start = TOD_LO;
+	
+  if (user)
+    *user = cur_proc->p_usert_total;
+
+  if (kernel)
+    *kernel = cur_proc->p_kernelt_total;
+
+  if (wallclock)
+    *wallclock = TOD_LO - cur_proc->p_wallclock_start;
 }
 
 /* Create a child process for the current process; PC and $SP are in statep, cpid contains
@@ -44,6 +52,9 @@ HIDDEN int Create_Process(state_t *statep, int priority, void **cpid) {
 
 	/* Set state */
 	memcpy(statep, &new_proc->p_s, sizeof(state_t));
+
+  /* Time management */
+  new_proc->p_wallclock_start = TOD_LO;
 
 	/* Set start_time */
   /* new_proc->p_start_time = get_microseconds(); */
@@ -138,6 +149,11 @@ extern void Passeren(int *semaddr) {
   if (blocked) {
     memcpy(old_area, &cur_proc->p_s, sizeof(state_t));
     cur_proc->p_s.pc_epc += WORD_SIZE;
+
+    /* Time management */
+    cur_proc->p_kernelt_total += TOD_LO - cur_proc->p_kernelt_start;
+    cur_proc->p_kernelt_start = 0;
+
     cur_proc = NULL;
 
     /* Schedule new process */
@@ -177,16 +193,26 @@ HIDDEN int Spec_Passup(int type, state_t *old, state_t *new) {
  * NOTE: Breakpoints not handled in this phase
  */
 extern void sysbp() {
-  /* Keeps the time spent in Kernel Mode */
-  unsigned int kernel_start_time = get_microseconds();
-
   state_t *old_area = (state_t *)SYSBP_OAREA;
 
+  /* Time management */
+  if (cur_proc->p_usert_start) {
+    cur_proc->p_usert_total += TOD_LO - cur_proc->p_usert_start;
+    cur_proc->p_usert_start = 0;
+  }
+  cur_proc->p_kernelt_start = TOD_LO;
+
+  /* Syscall return management */
   uint32_t ret = 0;
+
   /* Register a0 tells us which syscall is being called
    * For a complete list, see sysbp.h
    */
   switch (old_area->reg_a0) {
+    case GETCPUTIME:
+      Get_CPU_Time((uint32_t *)old_area->reg_a1, (uint32_t *)old_area->reg_a2, (uint32_t *)old_area->reg_a3);
+      break;
+
     case CREATEPROCESS:
       ret = Create_Process((state_t *)old_area->reg_a1, (int)old_area->reg_a2, (void **)old_area->reg_a3);
       break;
@@ -218,8 +244,11 @@ extern void sysbp() {
   old_area->reg_v0 = ret;
   old_area->pc_epc += WORD_SIZE;
 
-  /* Updates process times */
-  cur_proc->p_kernel_time += get_microseconds() - kernel_start_time;
+  /* Time management */
+  cur_proc->p_kernelt_total += TOD_LO - cur_proc->p_kernelt_start;
+  cur_proc->p_kernelt_start = 0;
+  cur_proc->p_usert_start = TOD_LO;
 
+  /* Return to execution */
   LDST(old_area);
 }

@@ -9,6 +9,7 @@
 #include <const.h>
 #include <scheduler.e>
 #include <time.e>
+#include <time.h>
 
 /* Array of pcbs which have already sent a command and are waiting for a response */
 HIDDEN int dev_cur_semaphores[N_DEV_PER_IL * (N_EXT_IL - 1)];
@@ -89,6 +90,12 @@ extern void interrupt() {
   uint32_t rc_status,
            tr_status;
   pcb_t *freed_proc;
+
+  /* Time management */
+  if (cur_proc->p_usert_start) {
+    cur_proc->p_usert_total += TOD_LO - cur_proc->p_usert_start;
+    cur_proc->p_usert_start = 0;
+  }
 
   /* Special interrupt lines */
   if (get_line_pending(1)) /* If the local timer interrupt is pending */
@@ -179,5 +186,10 @@ extern void interrupt() {
       }
 
   state_t *old_area = (state_t *)INTERRUPT_OAREA;
+
+  /* Time management */
+  cur_proc->p_usert_start = TOD_LO;
+
+  /* Return to execution */
   LDST(old_area);
 }

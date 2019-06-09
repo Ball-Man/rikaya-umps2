@@ -29,6 +29,12 @@ extern void scheduler() {
         *current;
   struct list_head *pos;
   if ((current = outProcQ(&ready_queue, cur_proc))) {  /* If a process was being executed */
+    /* Time management */
+    if (current->p_kernelt_start) {
+      current->p_kernelt_total += TOD_LO - current->p_kernelt_start;
+      current->p_kernelt_start = 0;
+    }
+
     /* Save state, reset priority and reinsert in the queue */
     memcpy((state_t *)INTERRUPT_OAREA, &current->p_s, sizeof(state_t));
     current->priority = current->original_priority;
@@ -46,6 +52,10 @@ extern void scheduler() {
 
   /* Context switch */
   cur_proc = next;
+
+  /* Time management */
+  next->p_usert_start = TOD_LO;
+
   LDST(&next->p_s);
 }
 

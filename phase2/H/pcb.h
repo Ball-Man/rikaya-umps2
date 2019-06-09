@@ -20,8 +20,11 @@ typedef struct pcb_t {
   int *p_semKey;
 
   /* Time */
-  unsigned int p_kernel_time;
-  unsigned int p_user_time;
+  uint32_t p_wallclock_start;
+  uint32_t p_usert_start;
+  uint32_t p_usert_total;
+  uint32_t p_kernelt_start;
+  uint32_t p_kernelt_total;
 
   /* I/O management */
   uint32_t io_command;
