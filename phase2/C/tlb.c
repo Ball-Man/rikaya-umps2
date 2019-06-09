@@ -5,14 +5,15 @@
 #include <lang.e>
 #include <sysbp.e>
 #include <sysbp.h>
+#include <scheduler.e>
 
 extern void tlb() {
   state_t *old_area = (state_t *)TLB_OAREA;
 
-  if (!spec_set[SPEC_TYPE_TLB])
+  if (!cur_proc->spec_set[SPEC_TYPE_TLB])
     Terminate_Process(0);
 
   /* Nothing to do here, call superior handler */
-  memcpy(old_area, spec_oarea[SPEC_TYPE_TLB], sizeof(state_t));
-  LDST(spec_narea[SPEC_TYPE_TLB]);
+  memcpy(old_area, cur_proc->spec_oarea[SPEC_TYPE_TLB], sizeof(state_t));
+  LDST(cur_proc->spec_narea[SPEC_TYPE_TLB]);
 }

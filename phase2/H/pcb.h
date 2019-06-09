@@ -29,6 +29,11 @@ typedef struct pcb_t {
   /* I/O management */
   uint32_t io_command;
   uint8_t io_transm;
+
+  /* Trap vectors */
+  state_t *spec_oarea[3];
+  state_t *spec_narea[3];
+  bool spec_set[3];
 } pcb_t;
 
 #endif
