@@ -25,7 +25,7 @@ HIDDEN void Get_CPU_Time(unsigned int *user, unsigned int *kernel, unsigned int 
   /* Update time before returning it */
   cur_proc->p_kernelt_total += TOD_LO - cur_proc->p_kernelt_start;
   cur_proc->p_kernelt_start = TOD_LO;
-	
+
   if (user)
     *user = cur_proc->p_usert_total;
 
@@ -93,13 +93,13 @@ extern int Terminate_Process(void **pid) {
 
   if (proc->p_semKey) { /* Remove from blocked semaphore and fix the semaphore if necessary */
     *proc->p_semKey += 1;
-    outChild(proc);
+    outBlocked(proc);
   }
 
   while (!emptyChild(proc))
     insertChild(parent, removeChild(proc));
 
-  outBlocked(proc);   /* Remove from semd if necessary */
+  outChild(proc);                 /* Remove from its father */
   outProcQ(&ready_queue, proc);   /* Remove from ready queue if necessary */
   freePcb(proc);
 
@@ -172,7 +172,7 @@ extern void Passeren(int *semaddr) {
 
 /* Waits a clock tick (100 ms) */
 extern void Wait_Clock() {
-  Passeren(&clock_semaphore); 
+  Passeren(&clock_semaphore);
 }
 
 /* Activates an I/O operation inside the register field of the indicated device by coping the command parameter;
@@ -194,13 +194,13 @@ HIDDEN void Set_Tutor() {
 }
 
 /* Assign a superior level handler for a specific exception(type).
- * Should be called maximum once per type. Returns 0 on success, -1 on error. 
+ * Should be called maximum once per type. Returns 0 on success, -1 on error.
  */
 HIDDEN int Spec_Passup(int type, state_t *old, state_t *new) {
   if (cur_proc->spec_set[type])
     return -1;
   cur_proc->spec_set[type] = true;  /* Can be called one time per type */
-  
+
   cur_proc->spec_oarea[type] = old;
   cur_proc->spec_narea[type] = new;
 
