@@ -15,7 +15,7 @@ HIDDEN uint32_t term_status(termreg_t *term) {
 
 /* Select the terminal id for the standard output */
 extern termreg_t *term_sel(uint8_t term) {
-  return term_default = (termreg_t *) DEV_REG_ADDR(IL_TERMINAL, 0);
+  return term_default = (termreg_t *) DEV_REG_ADDR(IL_TERMINAL, term);
 }
 
 /* Print string on given terminal. Returns the last status from the device */
@@ -127,7 +127,7 @@ extern uint32_t term_printf_sel(termreg_t *term, const char *format, ...) {
   va_start(args, format);
 
   stat = _term_printf_sel(term, format, args);
-  
+
   va_end(args);
 
   return stat;
