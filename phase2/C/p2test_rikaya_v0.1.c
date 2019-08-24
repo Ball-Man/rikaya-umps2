@@ -25,7 +25,6 @@
 /*#include <types.h> */
 #include <umps/libumps.h>
 #include <umps/arch.h>
-#include <pcb.e>
 
 typedef unsigned int devregtr;
 typedef unsigned int cpu_t;
