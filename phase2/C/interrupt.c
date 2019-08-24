@@ -107,7 +107,7 @@ extern void interrupt() {
     /* Set new timer */
     set_interval_timer(get_timer_value(SYSTEM_CLOCK_MS));
   }
-  
+
   /* I/O devices' interrupt lines */
   for (i = 3; i < 7; i++)    /* Skipping line 7 since it has its own special management */
     if (get_line_pending(i)) {
@@ -165,7 +165,7 @@ extern void interrupt() {
         }
 
         /* Update transmit status */
-        if (tr_status != TERM_ST_BUSY && tr_status != DEV_ST_READY 
+        if (tr_status != TERM_ST_BUSY && tr_status != DEV_ST_READY
           && tr_status != DEV_ST_NOT_INSTALLED) {
           /* Free waiting process */
           if (term_cur_semaphores[1][i]) {
